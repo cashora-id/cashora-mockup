@@ -127,3 +127,52 @@
   from { opacity: 0; transform: scale(0.8); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* Blog article prose */
+.prose-cashora h2 {
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.3;
+  color: #0A2540;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-cashora p {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #475569;
+  margin-bottom: 1.25rem;
+}
+
+.prose-cashora strong {
+  font-weight: 700;
+  color: #0A2540;
+}
+
+.prose-cashora ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 1.25rem;
+}
+
+.prose-cashora ul li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #475569;
+}
+
+.prose-cashora ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.65rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #00C897;
+}

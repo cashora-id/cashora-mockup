@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Zap, MapPin, Mail, Phone, Instagram, Linkedin, Facebook } from 'lucide-react'
+import { Zap, MapPin, Mail, Phone, MessageCircle, Link2, Share2 } from 'lucide-react'
 
 const footerLinks = {
   Produk: [
@@ -70,9 +70,9 @@ export default function Footer() {
             {/* Social */}
             <div className="flex gap-3 mt-6">
               {[
-                { icon: Instagram, label: 'Instagram' },
-                { icon: Linkedin, label: 'LinkedIn' },
-                { icon: Facebook, label: 'Facebook' },
+                { icon: MessageCircle, label: 'WhatsApp' },
+                { icon: Link2, label: 'LinkedIn' },
+                { icon: Share2, label: 'Sosial' },
               ].map(({ icon: Icon, label }) => (
                 <a
                   key={label}

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
-import { MapPin, Mail, Phone, Instagram, Linkedin, Facebook, Send, CheckCircle } from 'lucide-react'
+import { MapPin, Mail, Phone, MessageCircle, Link2, Share2, Send, CheckCircle } from 'lucide-react'
 
 export default function KontakPage() {
   const [sent, setSent] = useState(false)
@@ -175,9 +175,9 @@ export default function KontakPage() {
                     <p className="text-sm font-semibold text-[#0A2540] mb-3 font-body">Ikuti Kami</p>
                     <div className="flex gap-3">
                       {[
-                        { icon: Instagram, label: 'Instagram' },
-                        { icon: Linkedin, label: 'LinkedIn' },
-                        { icon: Facebook, label: 'Facebook' },
+                        { icon: MessageCircle, label: 'WhatsApp' },
+                        { icon: Link2, label: 'LinkedIn' },
+                        { icon: Share2, label: 'Sosial' },
                       ].map(({ icon: Icon, label }) => (
                         <a
                           key={label}
