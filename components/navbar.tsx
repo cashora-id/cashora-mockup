@@ -50,9 +50,9 @@ export default function Navbar() {
             <Image
               src="/cashora-logo.png"
               alt="Cashora logo"
-              width={36}
-              height={36}
-              className="w-9 h-9 object-contain"
+              width={56}
+              height={56}
+              className="w-14 h-14 object-contain mix-blend-screen"
               priority
             />
             <span className="font-sans font-bold text-xl text-white tracking-tight">
