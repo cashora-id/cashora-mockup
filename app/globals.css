@@ -128,6 +128,24 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+/* CTA pulse ring — fires every 3 s */
+@keyframes pingSlow {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  70%  { transform: scale(1.55); opacity: 0; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+.animate-ping-slow {
+  animation: pingSlow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Animated gradient border for Pro pricing card */
+@keyframes borderSpin {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+
 /* Blog article prose */
 .prose-cashora h2 {
   font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);

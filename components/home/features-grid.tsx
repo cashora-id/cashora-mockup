@@ -1,4 +1,7 @@
+'use client'
+
 import { Wifi, TrendingUp, ShieldCheck, QrCode } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const features = [
   {
@@ -31,35 +34,58 @@ const features = [
   },
 ]
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 28, scale: 0.94 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] },
+  }),
+}
+
 export default function FeaturesGrid() {
   return (
     <section className="bg-[#F5F7FA] py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
           <p className="text-sm font-semibold text-[#00C897] uppercase tracking-widest mb-3 font-body">
             Keunggulan Utama
           </p>
           <h2 className="font-sans font-bold text-3xl sm:text-4xl text-[#0A2540] text-balance">
             Dirancang untuk Bisnis Indonesia
           </h2>
-        </div>
+        </motion.div>
 
         {/* Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((f) => (
-            <div
+          {features.map((f, i) => (
+            <motion.div
               key={f.title}
-              className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg hover:shadow-gray-200/80 hover:-translate-y-1 transition-all duration-300"
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              whileHover={{ scale: 1.03, y: -6, transition: { type: 'spring', stiffness: 280, damping: 20 } }}
+              className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/70 cursor-default"
             >
-              <div
+              <motion.div
                 className={`w-12 h-12 ${f.bg} rounded-xl flex items-center justify-center mb-4`}
+                whileHover={{ scale: 1.12, rotate: 4, transition: { type: 'spring', stiffness: 300 } }}
               >
-                <f.icon className="w-6 h-6" style={{ color: f.color }} strokeWidth={2} />
-              </div>
+                <f.icon className="w-6 h-6 transition-colors duration-200" style={{ color: f.color }} strokeWidth={2} />
+              </motion.div>
               <h3 className="font-sans font-bold text-base text-[#0A2540] mb-2">{f.title}</h3>
               <p className="text-sm text-gray-500 leading-relaxed font-body">{f.desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

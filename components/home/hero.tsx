@@ -2,11 +2,63 @@
 
 import Link from 'next/link'
 import { ArrowRight, Play, ShieldCheck, Wifi, Store } from 'lucide-react'
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+
+/* ─── Particle dots background ─────────────────────────────────────────────── */
+const PARTICLES = Array.from({ length: 28 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 2.5 + 1,
+  dur: Math.random() * 14 + 10,
+  delay: Math.random() * 6,
+}))
+
+/* ─── Stagger helpers ───────────────────────────────────────────────────────── */
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.3 } },
+}
+const itemVariants = {
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+}
+const navbarVariants = {
+  hidden: { opacity: 0, y: -16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+}
 
 export default function Hero() {
+  /* ── Mouse parallax for mockup ── */
+  const mx = useMotionValue(0)
+  const my = useMotionValue(0)
+  const springX = useSpring(mx, { stiffness: 60, damping: 18 })
+  const springY = useSpring(my, { stiffness: 60, damping: 18 })
+  const rotateY = useTransform(springX, [-300, 300], [6, -6])
+  const rotateX = useTransform(springY, [-300, 300], [-5, 5])
+
+  const heroRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const el = heroRef.current
+    if (!el) return
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect()
+      mx.set(e.clientX - rect.left - rect.width / 2)
+      my.set(e.clientY - rect.top - rect.height / 2)
+    }
+    el.addEventListener('mousemove', onMove)
+    return () => el.removeEventListener('mousemove', onMove)
+  }, [mx, my])
+
   return (
-    <section className="relative bg-[#0A2540] overflow-hidden pt-16">
-      {/* Subtle decorative grid */}
+    <section
+      ref={heroRef}
+      className="relative bg-[#0A2540] overflow-hidden pt-16"
+      style={{ perspective: '1200px' }}
+    >
+      {/* Grid texture */}
       <div
         className="absolute inset-0 opacity-[0.04]"
         style={{
@@ -17,76 +69,112 @@ export default function Hero() {
         aria-hidden="true"
       />
 
-      {/* Accent glow */}
+      {/* Radial accent glow */}
       <div
-        className="absolute -top-40 right-0 w-[600px] h-[600px] rounded-full opacity-10"
+        className="absolute -top-40 right-0 w-[600px] h-[600px] rounded-full opacity-[0.12] pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #00C897, transparent 70%)' }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute bottom-0 left-1/3 w-[400px] h-[400px] rounded-full opacity-[0.06] pointer-events-none"
         style={{ background: 'radial-gradient(circle, #00C897, transparent 70%)' }}
         aria-hidden="true"
       />
 
+      {/* Animated particle dots */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {PARTICLES.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full bg-[#00C897]/40"
+            style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
+            animate={{ y: [0, -18, 0], opacity: [0.3, 0.8, 0.3] }}
+            transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        ))}
+      </div>
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left — Copy */}
-          <div>
+
+          {/* ── Left: Copy (staggered entry) ── */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00C897]/15 border border-[#00C897]/30 mb-6">
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00C897]/15 border border-[#00C897]/30 mb-6">
               <span className="w-2 h-2 rounded-full bg-[#00C897] animate-pulse" />
               <span className="text-xs font-semibold text-[#00C897] tracking-wide uppercase">
                 Platform POS #1 untuk UMKM Indonesia
               </span>
-            </div>
+            </motion.div>
 
-            <h1 className="font-sans font-bold text-4xl sm:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-6 text-balance">
+            <motion.h1
+              variants={itemVariants}
+              className="font-sans font-bold text-4xl sm:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-6 text-balance"
+            >
               Kelola Bisnis Lebih{' '}
               <span className="text-[#00C897]">Mudah</span>{' '}
               dengan Cashora
-            </h1>
+            </motion.h1>
 
-            <p className="text-lg text-white/70 leading-relaxed mb-8 max-w-xl">
+            <motion.p
+              variants={itemVariants}
+              className="text-lg text-white/70 leading-relaxed mb-8 max-w-xl font-body"
+            >
               Platform POS modern dengan mode offline, tanpa biaya per cabang, dan keamanan perbankan. Dari warung hingga korporasi.
-            </p>
+            </motion.p>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap gap-4 mb-8">
+            <motion.div variants={itemVariants} className="flex flex-wrap gap-4 mb-8">
               {[
                 { icon: Wifi, label: 'Offline-First' },
                 { icon: ShieldCheck, label: 'Keamanan 7 Lapis' },
                 { icon: Store, label: 'Tanpa Biaya per Cabang' },
               ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-1.5 text-white/60 text-sm">
+                <div key={label} className="flex items-center gap-1.5 text-white/60 text-sm font-body">
                   <Icon className="w-4 h-4 text-[#00C897]" strokeWidth={2} />
                   <span>{label}</span>
                 </div>
               ))}
-            </div>
+            </motion.div>
 
             {/* CTAs */}
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/demo"
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#00C897] text-[#0A2540] font-semibold rounded-xl hover:bg-[#00a87e] transition-colors text-sm"
-              >
+            <motion.div variants={itemVariants} className="flex flex-wrap gap-3">
+              {/* Pulse CTA */}
+              <Link href="/demo" className="relative inline-flex items-center gap-2 px-6 py-3.5 bg-[#00C897] text-[#0A2540] font-semibold rounded-xl text-sm group">
+                {/* Pulse rings */}
+                <span className="absolute inset-0 rounded-xl bg-[#00C897] opacity-0 group-hover:opacity-0 animate-ping-slow pointer-events-none" aria-hidden="true" />
                 <Play className="w-4 h-4" fill="currentColor" strokeWidth={0} />
                 Coba Demo Interaktif
               </Link>
               <Link
                 href="/layanan"
-                className="inline-flex items-center gap-2 px-6 py-3.5 text-white border border-white/25 rounded-xl hover:bg-white/10 transition-colors text-sm font-semibold"
+                className="inline-flex items-center gap-2 px-6 py-3.5 text-white border border-white/25 rounded-xl hover:bg-white/10 transition-colors text-sm font-semibold font-body"
               >
                 Lihat Fitur
                 <ArrowRight className="w-4 h-4" />
               </Link>
-            </div>
+            </motion.div>
 
-            {/* Social proof */}
-            <p className="mt-6 text-xs text-white/40">
+            <motion.p variants={itemVariants} className="mt-6 text-xs text-white/40 font-body">
               Dipercaya oleh <strong className="text-white/70">10.000+</strong> merchant di seluruh Indonesia
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
-          {/* Right — Dashboard mockup */}
-          <div className="relative flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-lg">
+          {/* ── Right: 3D Parallax Mockup ── */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="relative flex justify-center lg:justify-end"
+          >
+            <motion.div
+              style={{ rotateY, rotateX, transformStyle: 'preserve-3d' }}
+              className="relative w-full max-w-lg"
+            >
               {/* Main dashboard card */}
               <div className="bg-white rounded-2xl shadow-2xl shadow-black/40 overflow-hidden border border-white/10">
                 {/* Browser chrome */}
@@ -101,7 +189,6 @@ export default function Hero() {
 
                 {/* Dashboard UI */}
                 <div className="p-4 bg-white">
-                  {/* Header */}
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-[10px] text-gray-400 font-body">Selamat pagi, Budi 👋</p>
@@ -113,26 +200,29 @@ export default function Hero() {
                     </div>
                   </div>
 
-                  {/* Stats row */}
+                  {/* Stats row — animate reveal */}
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     {[
                       { label: 'Transaksi Hari Ini', value: '128', color: '#00C897' },
                       { label: 'Pendapatan', value: 'Rp 4,2Jt', color: '#0A2540' },
                       { label: 'Produk Terjual', value: '312', color: '#00C897' },
                     ].map((stat) => (
-                      <div key={stat.label} className="bg-[#F5F7FA] rounded-xl p-2.5">
+                      <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, scaleX: 0 }}
+                        animate={{ opacity: 1, scaleX: 1 }}
+                        transition={{ duration: 0.5, delay: 0.9, ease: 'easeOut' }}
+                        style={{ transformOrigin: 'left' }}
+                        className="bg-[#F5F7FA] rounded-xl p-2.5"
+                      >
                         <p className="text-[9px] text-gray-400 mb-1 font-body">{stat.label}</p>
-                        <p
-                          className="text-sm font-bold font-sans"
-                          style={{ color: stat.color }}
-                        >
+                        <p className="text-sm font-bold font-sans" style={{ color: stat.color }}>
                           {stat.value}
                         </p>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
 
-                  {/* Recent transactions */}
                   <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-2 font-body">
                     Transaksi Terbaru
                   </p>
@@ -141,9 +231,12 @@ export default function Hero() {
                       { name: 'Nasi Goreng + Es Teh', time: '09:42', amount: 'Rp 28.000', method: 'QRIS' },
                       { name: 'Ayam Bakar Komplit', time: '09:38', amount: 'Rp 45.000', method: 'Tunai' },
                       { name: 'Mie Ayam Bakso', time: '09:31', amount: 'Rp 22.000', method: 'QRIS' },
-                    ].map((tx) => (
-                      <div
+                    ].map((tx, i) => (
+                      <motion.div
                         key={tx.time}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: 1 + i * 0.1, ease: 'easeOut' }}
                         className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-[#F5F7FA] transition-colors"
                       >
                         <div className="flex items-center gap-2">
@@ -152,18 +245,23 @@ export default function Hero() {
                           </div>
                           <div>
                             <p className="text-[10px] font-medium text-[#0A2540] font-body">{tx.name}</p>
-                            <p className="text-[9px] text-gray-400 font-body">{tx.time} • {tx.method}</p>
+                            <p className="text-[9px] text-gray-400 font-body">{tx.time} · {tx.method}</p>
                           </div>
                         </div>
                         <p className="text-[10px] font-bold text-[#0A2540] font-body">{tx.amount}</p>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
               </div>
 
               {/* Floating offline badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.2, ease: 'easeOut' }}
+                className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg px-3 py-2 flex items-center gap-2 border border-gray-100"
+              >
                 <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
                   <Wifi className="w-4 h-4 text-amber-500" />
                 </div>
@@ -171,15 +269,21 @@ export default function Hero() {
                   <p className="text-[10px] font-semibold text-gray-700 font-body">Offline Mode</p>
                   <p className="text-[9px] text-gray-400 font-body">Tetap berjalan!</p>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Floating QRIS badge */}
-              <div className="absolute -top-4 -right-4 bg-[#0A2540] rounded-xl shadow-lg px-3 py-2">
+              <motion.div
+                initial={{ opacity: 0, y: -16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.3, ease: 'easeOut' }}
+                className="absolute -top-4 -right-4 bg-[#0A2540] rounded-xl shadow-lg px-3 py-2"
+              >
                 <p className="text-[10px] font-bold text-[#00C897] font-body">QRIS TUNTAS</p>
                 <p className="text-[9px] text-white/60 font-body">Tarik · Setor · Transfer</p>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+
         </div>
       </div>
 

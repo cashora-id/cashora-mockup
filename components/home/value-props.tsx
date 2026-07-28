@@ -1,4 +1,7 @@
+'use client'
+
 import { Wifi, Store, Utensils, ShoppingBag, Check } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const props = [
   {
@@ -24,7 +27,7 @@ const props = [
             </div>
           </div>
           <div className="space-y-2 mb-4">
-            {['Transaksi #1023', 'Transaksi #1024', 'Transaksi #1025'].map((t, i) => (
+            {['Transaksi #1023', 'Transaksi #1024', 'Transaksi #1025'].map((t) => (
               <div key={t} className="flex items-center justify-between bg-white/10 rounded-lg px-3 py-2">
                 <span className="text-xs font-body text-white/80">{t}</span>
                 <span className="text-xs font-body text-amber-400">Menunggu sync</span>
@@ -179,25 +182,36 @@ export default function ValueProps() {
     <section className="bg-white py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-16">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
           <p className="text-sm font-semibold text-[#00C897] uppercase tracking-widest mb-3 font-body">
             Mengapa Cashora?
           </p>
           <h2 className="font-sans font-bold text-3xl sm:text-4xl text-[#0A2540] text-balance max-w-2xl mx-auto">
             Solusi Lengkap yang Tumbuh Bersama Bisnis Anda
           </h2>
-        </div>
+        </motion.div>
 
         <div className="space-y-20">
-          {props.map((item) => (
+          {props.map((item, idx) => (
             <div
               key={item.title}
               className={`grid lg:grid-cols-2 gap-12 items-center ${
                 item.reverse ? 'lg:[&>*:first-child]:order-last' : ''
               }`}
             >
-              {/* Text */}
-              <div>
+              {/* Text: slide from left (or right if reversed) */}
+              <motion.div
+                initial={{ opacity: 0, x: item.reverse ? 40 : -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              >
                 <div className="inline-flex w-12 h-12 bg-[#00C897]/10 rounded-xl items-center justify-center mb-5">
                   <item.icon className="w-6 h-6 text-[#00C897]" strokeWidth={2} />
                 </div>
@@ -213,10 +227,18 @@ export default function ValueProps() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
 
-              {/* Visual */}
-              <div>{item.visual}</div>
+              {/* Visual: slide from right (or left if reversed) */}
+              <motion.div
+                initial={{ opacity: 0, x: item.reverse ? -40 : 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.02, transition: { type: 'spring', stiffness: 200, damping: 22 } }}
+              >
+                {item.visual}
+              </motion.div>
             </div>
           ))}
         </div>
