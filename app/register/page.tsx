@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Zap, Eye, EyeOff, Check, ArrowRight } from 'lucide-react'
+import Image from 'next/image'
+import { Eye, EyeOff, Check, ArrowRight } from 'lucide-react'
 
 const businessTypes = ['UMKM / Toko Kecil', 'Restoran / Kafe', 'Retail / Minimarket', 'Korporasi / Franchise', 'Lainnya']
 
@@ -46,9 +47,13 @@ export default function RegisterPage() {
         />
 
         <Link href="/" className="flex items-center gap-2 relative">
-          <div className="w-8 h-8 bg-[#00C897] rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </div>
+          <Image
+            src="/cashora-logo.png"
+            alt="Cashora logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 object-contain"
+          />
           <span className="font-sans font-bold text-xl text-white tracking-tight">Cashora</span>
         </Link>
 
@@ -82,9 +87,7 @@ export default function RegisterPage() {
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10">
         {/* Mobile logo */}
         <Link href="/" className="flex items-center gap-2 mb-8 lg:hidden">
-          <div className="w-8 h-8 bg-[#00C897] rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </div>
+          <Image src="/cashora-logo.png" alt="Cashora logo" width={32} height={32} className="w-8 h-8 object-contain" />
           <span className="font-sans font-bold text-xl text-[#0A2540] tracking-tight">Cashora</span>
         </Link>
 

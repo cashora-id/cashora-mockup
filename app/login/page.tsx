@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Zap, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react'
+import Image from 'next/image'
+import { Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react'
 
 export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
@@ -23,9 +24,13 @@ export default function LoginPage() {
           aria-hidden="true"
         />
         <Link href="/" className="flex items-center gap-2 relative">
-          <div className="w-8 h-8 bg-[#00C897] rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </div>
+          <Image
+            src="/cashora-logo.png"
+            alt="Cashora logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 object-contain"
+          />
           <span className="font-sans font-bold text-xl text-white tracking-tight">Cashora</span>
         </Link>
 
@@ -33,8 +38,8 @@ export default function LoginPage() {
           {/* Mockup mini dashboard */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 mb-8 border border-white/20">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 bg-[#00C897] rounded-lg flex items-center justify-center">
-                <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+              <div className="w-6 h-6 flex items-center justify-center">
+                <Image src="/cashora-logo.png" alt="" width={24} height={24} className="w-6 h-6 object-contain" />
               </div>
               <span className="text-white text-xs font-sans font-bold">Dashboard Cashora</span>
             </div>
@@ -70,9 +75,7 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10">
         {/* Mobile logo */}
         <Link href="/" className="flex items-center gap-2 mb-8 lg:hidden">
-          <div className="w-8 h-8 bg-[#00C897] rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </div>
+          <Image src="/cashora-logo.png" alt="Cashora logo" width={32} height={32} className="w-8 h-8 object-contain" />
           <span className="font-sans font-bold text-xl text-[#0A2540] tracking-tight">Cashora</span>
         </Link>
 

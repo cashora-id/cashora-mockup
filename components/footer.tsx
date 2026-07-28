@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Zap, MapPin, Mail, Phone, MessageCircle, Link2, Share2 } from 'lucide-react'
+import Image from 'next/image'
+import { MapPin, Mail, Phone, MessageCircle, Link2, Share2 } from 'lucide-react'
 
 const footerLinks = {
   Produk: [
@@ -41,9 +42,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-[#00C897] rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
+              <Image
+                src="/cashora-logo.png"
+                alt="Cashora logo"
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain"
+              />
               <span className="font-sans font-bold text-xl tracking-tight">Cashora</span>
             </Link>
             <p className="text-white/60 text-sm leading-relaxed mb-6 max-w-xs">
