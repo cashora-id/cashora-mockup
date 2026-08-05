@@ -3,17 +3,26 @@
 import Link from 'next/link'
 import { ArrowRight, Play, ShieldCheck, Wifi, Store } from 'lucide-react'
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /* ─── Particle dots background ─────────────────────────────────────────────── */
-const PARTICLES = Array.from({ length: 28 }, (_, i) => ({
-  id: i,
-  x: Math.random() * 100,
-  y: Math.random() * 100,
-  size: Math.random() * 2.5 + 1,
-  dur: Math.random() * 14 + 10,
-  delay: Math.random() * 6,
-}))
+const PARTICLES = [
+  { id: 0, x: 12.5, y: 34.2, size: 2.1, dur: 18, delay: 0.5 },
+  { id: 1, x: 85.3, y: 15.6, size: 1.8, dur: 14, delay: 1.2 },
+  { id: 2, x: 45.1, y: 78.4, size: 3.0, dur: 22, delay: 2.0 },
+  { id: 3, x: 67.8, y: 52.1, size: 1.5, dur: 16, delay: 0.8 },
+  { id: 4, x: 28.4, y: 88.9, size: 2.4, dur: 20, delay: 1.5 },
+  { id: 5, x: 92.1, y: 64.3, size: 1.9, dur: 12, delay: 2.8 },
+  { id: 6, x: 55.6, y: 22.7, size: 2.8, dur: 24, delay: 0.2 },
+  { id: 7, x: 38.2, y: 41.5, size: 1.6, dur: 15, delay: 1.9 },
+  { id: 8, x: 74.9, y: 83.1, size: 2.2, dur: 19, delay: 3.1 },
+  { id: 9, x: 19.3, y: 61.8, size: 2.7, dur: 17, delay: 0.6 },
+  { id: 10, x: 81.7, y: 44.2, size: 1.4, dur: 13, delay: 2.3 },
+  { id: 11, x: 63.4, y: 11.9, size: 2.5, dur: 21, delay: 1.1 },
+  { id: 12, x: 31.8, y: 73.6, size: 1.7, dur: 16, delay: 2.6 },
+  { id: 13, x: 96.2, y: 29.8, size: 2.9, dur: 23, delay: 0.4 },
+  { id: 14, x: 49.5, y: 94.1, size: 1.8, dur: 15, delay: 1.7 },
+];
 
 /* ─── Stagger helpers ───────────────────────────────────────────────────────── */
 const containerVariants = {
@@ -38,7 +47,12 @@ export default function Hero() {
   const rotateY = useTransform(springX, [-300, 300], [6, -6])
   const rotateX = useTransform(springY, [-300, 300], [-5, 5])
 
+  const [mounted, setMounted] = useState(false)
   const heroRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const el = heroRef.current
@@ -82,17 +96,19 @@ export default function Hero() {
       />
 
       {/* Animated particle dots */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        {PARTICLES.map((p) => (
-          <motion.div
-            key={p.id}
-            className="absolute rounded-full bg-[#00C897]/40"
-            style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
-            animate={{ y: [0, -18, 0], opacity: [0.3, 0.8, 0.3] }}
-            transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        ))}
-      </div>
+      {mounted && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          {PARTICLES.map((p) => (
+            <motion.div
+              key={p.id}
+              className="absolute rounded-full bg-[#00C897]/40"
+              style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
+              animate={{ y: [0, -18, 0], opacity: [0.3, 0.8, 0.3] }}
+              transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -183,7 +199,7 @@ export default function Hero() {
                   <div className="w-3 h-3 rounded-full bg-yellow-400" />
                   <div className="w-3 h-3 rounded-full bg-green-400" />
                   <div className="ml-3 flex-1 bg-white rounded px-3 py-1 text-[10px] text-gray-400 font-mono">
-                    cashora.id/dashboard
+                    cashora.id/owner/menu
                   </div>
                 </div>
 

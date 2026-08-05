@@ -44,19 +44,19 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-3">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
+          <Link href="/" className="flex items-center gap-3 shrink-0 group">
             <Image
               src="/cashora-logo.png"
               alt="Cashora logo"
-              width={120}
-              height={120}
-              className="w-20 h-20 object-contain mix-blend-screen"
+              width={36}
+              height={36}
+              className="w-9 h-9 object-contain group-hover:scale-105 transition-transform"
               priority
             />
-            <span className="font-sans font-bold text-2xl text-white tracking-tight">
-              Cashora
+            <span className="font-sans font-extrabold text-xl text-white tracking-tight">
+              Cashora<span className="text-[#00C897]">.</span>
             </span>
           </Link>
 

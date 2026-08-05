@@ -41,15 +41,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
+            <Link href="/" className="flex items-center gap-3 mb-4 group">
               <Image
                 src="/cashora-logo.png"
                 alt="Cashora logo"
                 width={36}
                 height={36}
-                className="w-9 h-9 object-contain"
+                className="w-9 h-9 object-contain group-hover:scale-105 transition-transform"
               />
-              <span className="font-sans font-bold text-xl tracking-tight">Cashora</span>
+              <span className="font-sans font-extrabold text-xl tracking-tight text-white">
+                Cashora<span className="text-[#00C897]">.</span>
+              </span>
             </Link>
             <p className="text-white/60 text-sm leading-relaxed mb-6 max-w-xs">
               Platform POS modern untuk semua skala bisnis Indonesia. Offline-first, aman, dan tanpa biaya per cabang.
