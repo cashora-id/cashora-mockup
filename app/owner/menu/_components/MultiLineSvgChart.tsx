@@ -30,13 +30,23 @@ export function MultiLineSvgChart({
     }
   });
 
-  const maxVal = Math.max(...allVals, 1) * 1.15;
+  const rawMax = Math.max(...allVals, 1);
+  const maxVal = rawMax * 1.15;
   const minVal = 0;
 
-  const width = 700;
-  const height = 220;
-  const paddingX = 40;
-  const paddingY = 30;
+  const width = 740;
+  const height = 240;
+  const paddingLeft = 60;
+  const paddingRight = 35;
+  const paddingTop = 25;
+  const paddingBottom = 40;
+
+  // Helper to format currency for Y-Axis labels
+  const formatYLabel = (val: number) => {
+    if (val >= 1_000_000) return `Rp ${(val / 1_000_000).toFixed(1)}Jt`;
+    if (val >= 1_000) return `Rp ${(val / 1_000).toFixed(0)}rb`;
+    return `Rp ${val}`;
+  };
 
   // Helper to get series value for a point
   const getVal = (pt: ChartPoint, seriesKey: string): number => {
@@ -47,12 +57,22 @@ export function MultiLineSvgChart({
     return 0;
   };
 
+  // Helper to calculate X coordinate for a point index
+  const getX = (idx: number) => {
+    return paddingLeft + (idx / (points.length - 1 || 1)) * (width - paddingLeft - paddingRight);
+  };
+
+  // Helper to calculate Y coordinate for a value
+  const getY = (val: number) => {
+    return height - paddingBottom - ((val - minVal) / (maxVal - minVal)) * (height - paddingTop - paddingBottom);
+  };
+
   // Build Bezier Path string for a series
   const buildPath = (seriesKey: string) => {
     const coords = points.map((pt, idx) => {
-      const x = paddingX + (idx / (points.length - 1 || 1)) * (width - 2 * paddingX);
+      const x = getX(idx);
       const val = getVal(pt, seriesKey);
-      const y = height - paddingY - ((val - minVal) / (maxVal - minVal)) * (height - 2 * paddingY);
+      const y = getY(val);
       return { x, y };
     });
 
@@ -70,42 +90,89 @@ export function MultiLineSvgChart({
   // Build Area Path for Total Line
   const totalPathData = buildPath("total");
   const totalAreaD = totalPathData.coords && totalPathData.coords.length > 0
-    ? `${totalPathData.d} L ${totalPathData.coords[totalPathData.coords.length - 1].x} ${height - paddingY} L ${totalPathData.coords[0].x} ${height - paddingY} Z`
+    ? `${totalPathData.d} L ${totalPathData.coords[totalPathData.coords.length - 1].x} ${height - paddingBottom} L ${totalPathData.coords[0].x} ${height - paddingBottom} Z`
     : "";
 
   const activeHoverPt = hoveredIndex !== null ? points[hoveredIndex] : null;
-  const activeHoverX = hoveredIndex !== null
-    ? paddingX + (hoveredIndex / (points.length - 1 || 1)) * (width - 2 * paddingX)
-    : 0;
+  const activeHoverX = hoveredIndex !== null ? getX(hoveredIndex) : 0;
+
+  // Y-axis grid ratios
+  const yRatios = [0, 0.33, 0.66, 1];
 
   return (
-    <div className="w-full h-full relative flex flex-col justify-between">
+    <div className="w-full h-full relative flex flex-col justify-between select-none">
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
         <defs>
           <linearGradient id="multiChartGradientSales" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#0A2540" stopOpacity="0.12" />
+            <stop offset="0%" stopColor="#0A2540" stopOpacity="0.15" />
             <stop offset="100%" stopColor="#0A2540" stopOpacity="0.0" />
           </linearGradient>
           <linearGradient id="multiChartGradientExpenses" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.12" />
+            <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.15" />
             <stop offset="100%" stopColor="#F43F5E" stopOpacity="0.0" />
           </linearGradient>
         </defs>
 
-        {/* Horizontal Grid lines */}
-        {[0.2, 0.5, 0.8].map((ratio) => {
-          const yPos = height - paddingY - ratio * (height - 2 * paddingY);
+        {/* Horizontal Grid lines & Y-Axis Labels */}
+        {yRatios.map((ratio) => {
+          const val = minVal + ratio * (maxVal - minVal);
+          const yPos = getY(val);
           return (
-            <line
-              key={ratio}
-              x1={paddingX}
-              y1={yPos}
-              x2={width - paddingX}
-              y2={yPos}
-              stroke="#E2E8F0"
-              strokeDasharray="4 4"
-              strokeWidth="1"
-            />
+            <g key={ratio}>
+              <line
+                x1={paddingLeft}
+                y1={yPos}
+                x2={width - paddingRight}
+                y2={yPos}
+                stroke="#E2E8F0"
+                strokeDasharray="4 4"
+                strokeWidth="1"
+              />
+              <text
+                x={paddingLeft - 10}
+                y={yPos + 4}
+                textAnchor="end"
+                className="text-[10px] font-semibold fill-slate-400"
+              >
+                {formatYLabel(val)}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Vertical Grid lines aligned precisely with each Time Label */}
+        {points.map((pt, idx) => {
+          const xPos = getX(idx);
+          const isHovered = hoveredIndex === idx;
+
+          return (
+            <g key={idx}>
+              <line
+                x1={xPos}
+                y1={paddingTop}
+                x2={xPos}
+                y2={height - paddingBottom}
+                stroke={isHovered ? "#0A2540" : "#F1F5F9"}
+                strokeDasharray={isHovered ? "4 4" : undefined}
+                strokeWidth={isHovered ? "1.5" : "1"}
+                className="transition-colors duration-200"
+              />
+              {/* Perfectly aligned X-Axis Time Label */}
+              <text
+                x={xPos}
+                y={height - 12}
+                textAnchor="middle"
+                className={`text-[11px] transition-all cursor-pointer ${
+                  isHovered
+                    ? "fill-[#0A2540] font-extrabold text-[12px]"
+                    : "fill-slate-500 font-semibold"
+                }`}
+                onMouseEnter={() => onHover(idx)}
+                onMouseLeave={() => onHover(null)}
+              >
+                {pt.label}
+              </text>
+            </g>
           );
         })}
 
@@ -118,7 +185,7 @@ export function MultiLineSvgChart({
           />
         )}
 
-        {/* Render Each Enabled Store Line */}
+        {/* Render Each Enabled Store Line & Node Circles */}
         {STORE_SERIES.map((s) => {
           if (!visibleLines[s.key]) return null;
           const { d, coords } = buildPath(s.key);
@@ -126,6 +193,7 @@ export function MultiLineSvgChart({
 
           return (
             <g key={s.key}>
+              {/* Line Curve */}
               <path
                 d={d}
                 fill="none"
@@ -136,55 +204,58 @@ export function MultiLineSvgChart({
                 className="transition-all duration-500"
               />
 
-              {/* Data Point Nodes for this line */}
-              {coords.map((c, idx) => (
-                <circle
-                  key={idx}
-                  cx={c.x}
-                  cy={c.y}
-                  r={hoveredIndex === idx ? (isTotal ? "6" : "5") : (isTotal ? "4" : "3")}
-                  fill={s.color}
-                  stroke="#FFFFFF"
-                  strokeWidth="2"
-                  className="transition-all duration-200 cursor-pointer"
-                  onMouseEnter={() => onHover(idx)}
-                />
-              ))}
+              {/* Node Circles centered EXACTLY at (c.x, c.y) */}
+              {coords.map((c, idx) => {
+                const isHovered = hoveredIndex === idx;
+                return (
+                  <g key={idx}>
+                    {/* Pulsing ring on hover */}
+                    {isHovered && (
+                      <circle
+                        cx={c.x}
+                        cy={c.y}
+                        r={isTotal ? "10" : "8"}
+                        fill={s.color}
+                        fillOpacity="0.25"
+                        className="animate-ping"
+                      />
+                    )}
+                    <circle
+                      cx={c.x}
+                      cy={c.y}
+                      r={isHovered ? (isTotal ? "7" : "6") : (isTotal ? "4.5" : "3.5")}
+                      fill={s.color}
+                      stroke="#FFFFFF"
+                      strokeWidth="2"
+                      className="transition-all duration-200 cursor-pointer shadow-sm"
+                      onMouseEnter={() => onHover(idx)}
+                      onMouseLeave={() => onHover(null)}
+                    />
+                  </g>
+                );
+              })}
             </g>
           );
         })}
-
-        {/* Hover Vertical Guideline */}
-        {hoveredIndex !== null && (
-          <line
-            x1={activeHoverX}
-            y1={paddingY}
-            x2={activeHoverX}
-            y2={height - paddingY}
-            stroke="#0A2540"
-            strokeWidth="1.5"
-            strokeDasharray="3 3"
-          />
-        )}
       </svg>
 
       {/* Multi-Series Hover Tooltip */}
       {hoveredIndex !== null && activeHoverPt && (
         <div
-          className="absolute z-30 bg-[#0A2540] text-white p-3 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none transform -translate-x-1/2 -translate-y-full transition-all duration-150 min-w-[210px]"
+          className="absolute z-30 bg-[#0A2540]/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none transform -translate-x-1/2 -translate-y-full transition-all duration-150 min-w-[220px]"
           style={{
             left: `${(activeHoverX / width) * 100}%`,
-            top: `20%`,
+            top: `18%`,
           }}
         >
-          <div className="flex items-center justify-between border-b border-slate-700 pb-1.5 mb-2">
+          <div className="flex items-center justify-between border-b border-slate-700/80 pb-1.5 mb-2">
             <span className="text-[11px] font-bold text-slate-300">{activeHoverPt.label}</span>
-            <span className="text-[10px] font-extrabold text-[#00C897]">
+            <span className="text-[11px] font-extrabold text-[#00C897]">
               {isSales ? activeHoverPt.totalSalesFormatted : activeHoverPt.totalExpensesFormatted} Total
             </span>
           </div>
 
-          <div className="space-y-1.5 text-[10px]">
+          <div className="space-y-1.5 text-[11px]">
             <div className="flex items-center justify-between text-blue-300 font-semibold">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-blue-500" />
@@ -217,22 +288,6 @@ export function MultiLineSvgChart({
           </div>
         </div>
       )}
-
-      {/* X-Axis Labels */}
-      <div className="flex justify-between px-6 pt-2 text-[11px] font-bold text-slate-500">
-        {points.map((pt, i) => (
-          <span
-            key={i}
-            className={`cursor-pointer transition-colors ${
-              hoveredIndex === i ? "text-[#0A2540] underline font-extrabold" : ""
-            }`}
-            onMouseEnter={() => onHover(i)}
-            onMouseLeave={() => onHover(null)}
-          >
-            {pt.label}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }
