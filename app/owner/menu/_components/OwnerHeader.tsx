@@ -14,6 +14,7 @@ interface OwnerHeaderProps {
   onMarkAsRead: (id: string) => void;
   onMarkAllAsRead: () => void;
   onClearAll: () => void;
+  onHelpToggle: () => void;
 }
 
 export function OwnerHeader({
@@ -21,6 +22,7 @@ export function OwnerHeader({
   onMarkAsRead,
   onMarkAllAsRead,
   onClearAll,
+  onHelpToggle,
 }: OwnerHeaderProps) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,7 @@ export function OwnerHeader({
   }, []);
 
   return (
-    <header className="sticky top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
+    <header id="tour-header" className="sticky top-0 w-full z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3 group">
@@ -92,11 +94,16 @@ export function OwnerHeader({
             )}
           </AnimatePresence>
 
+          {/* Bantuan (Help) Button */}
           <button
             aria-label="Bantuan"
-            className="p-2 rounded-xl text-slate-500 hover:text-[#0A2540] hover:bg-slate-100 transition-colors"
+            onClick={onHelpToggle}
+            className="p-2 rounded-xl text-slate-500 hover:text-[#0A2540] hover:bg-slate-100 transition-colors flex items-center gap-1.5 group"
           >
-            <CircleHelp className="w-5 h-5" />
+            <CircleHelp className="w-5 h-5 text-slate-500 group-hover:text-[#00C897] transition-colors" />
+            <span className="hidden md:inline-block text-xs font-bold text-slate-700 group-hover:text-[#0A2540]">
+              Bantuan
+            </span>
           </button>
 
           <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block" />

@@ -22,6 +22,8 @@ import { STORE_SERIES, businesses, dashboardData, initialNotifications } from ".
 import { OwnerHeader } from "./_components/OwnerHeader";
 import { MultiLineSvgChart } from "./_components/MultiLineSvgChart";
 import { BusinessCard } from "./_components/BusinessCard";
+import { HelpDrawer } from "./_components/HelpDrawer";
+import { DashboardTour } from "./_components/DashboardTour";
 
 export default function OwnerMenuPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("today");
@@ -43,6 +45,10 @@ export default function OwnerMenuPage() {
 
   // Notifications State
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+
+  // Help Drawer & Interactive Tour States
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isTourActive, setIsTourActive] = useState(false);
 
   const activeData = dashboardData[selectedPeriod];
 
@@ -81,10 +87,11 @@ export default function OwnerMenuPage() {
         onMarkAsRead={handleMarkAsRead}
         onMarkAllAsRead={handleMarkAllAsRead}
         onClearAll={handleClearAll}
+        onHelpToggle={() => setIsHelpOpen((prev) => !prev)}
       />
 
-      {/* ========== HERO BANNER & PERIOD SELECTOR ========== */}
-      <section className="bg-gradient-to-b from-[#0A2540] to-[#0d3154] text-white pt-8 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* ========== HERO BANNER & PERIOD SELECTOR (TOUR TARGET 2) ========== */}
+      <section id="tour-period-kpis" className="bg-gradient-to-b from-[#0A2540] to-[#0d3154] text-white pt-8 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-all">
         {/* Glow */}
         <div
           className="absolute -top-24 right-0 w-[500px] h-[500px] rounded-full opacity-20 pointer-events-none"
@@ -205,9 +212,9 @@ export default function OwnerMenuPage() {
         </div>
       </section>
 
-      {/* ========== MULTI-LINE SVG CHART & BREAKDOWN SECTION ========== */}
+      {/* ========== MULTI-LINE SVG CHART & BREAKDOWN SECTION (TOUR TARGET 3) ========== */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20 pb-20">
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 mb-10">
+        <div id="tour-chart" className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 mb-10 transition-all">
           {/* Chart Header & Toggles */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100">
             <div>
@@ -389,74 +396,76 @@ export default function OwnerMenuPage() {
           </div>
         </div>
 
-        {/* ========== STORE SEARCH & BENTO GRID SECTION ========== */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-[#0A2540] tracking-tight">Daftar Toko & Outlet Anda</h2>
-            <p className="text-xs text-slate-500">Pilih toko untuk mengelola setting & sistem kasir</p>
-          </div>
+        {/* ========== STORE SEARCH & BENTO GRID SECTION (TOUR TARGET 4) ========== */}
+        <div id="tour-stores" className="transition-all">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-[#0A2540] tracking-tight">Daftar Toko & Outlet Anda</h2>
+              <p className="text-xs text-slate-500">Pilih toko untuk mengelola setting & sistem kasir</p>
+            </div>
 
-          <div className="flex items-center gap-2">
-            {/* Tabs */}
-            <div className="flex items-center gap-1 bg-slate-200/60 p-1 rounded-xl">
-              <button
-                onClick={() => setActiveStoreTab("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeStoreTab === "all" ? "bg-white text-[#0A2540] shadow-sm" : "text-slate-600"
-                }`}
-              >
-                Semua ({businessList.length})
-              </button>
-              <button
-                onClick={() => setActiveStoreTab("active")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeStoreTab === "active" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600"
-                }`}
-              >
-                Aktif ({businessList.filter((b) => b.status === "active").length})
-              </button>
-              <button
-                onClick={() => setActiveStoreTab("maintenance")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeStoreTab === "maintenance" ? "bg-white text-amber-700 shadow-sm" : "text-slate-600"
-                }`}
-              >
-                Maintenance ({businessList.filter((b) => b.status === "maintenance").length})
-              </button>
+            <div className="flex items-center gap-2">
+              {/* Tabs */}
+              <div className="flex items-center gap-1 bg-slate-200/60 p-1 rounded-xl">
+                <button
+                  onClick={() => setActiveStoreTab("all")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    activeStoreTab === "all" ? "bg-white text-[#0A2540] shadow-sm" : "text-slate-600"
+                  }`}
+                >
+                  Semua ({businessList.length})
+                </button>
+                <button
+                  onClick={() => setActiveStoreTab("active")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    activeStoreTab === "active" ? "bg-white text-emerald-700 shadow-sm" : "text-slate-600"
+                  }`}
+                >
+                  Aktif ({businessList.filter((b) => b.status === "active").length})
+                </button>
+                <button
+                  onClick={() => setActiveStoreTab("maintenance")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    activeStoreTab === "maintenance" ? "bg-white text-amber-700 shadow-sm" : "text-slate-600"
+                  }`}
+                >
+                  Maintenance ({businessList.filter((b) => b.status === "maintenance").length})
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Search Input */}
-        <div className="relative mb-6">
-          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Cari nama toko atau kota..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00C897]/50 shadow-sm transition-all"
-          />
-        </div>
+          {/* Search Input */}
+          <div className="relative mb-6">
+            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Cari nama toko atau kota..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00C897]/50 shadow-sm transition-all"
+            />
+          </div>
 
-        {/* Business Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBusinesses.map((biz) => (
-            <BusinessCard key={biz.id} business={biz} />
-          ))}
+          {/* Business Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBusinesses.map((biz) => (
+              <BusinessCard key={biz.id} business={biz} />
+            ))}
 
-          {/* Add New Business Card */}
-          <div className="group flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-slate-300 hover:border-[#00C897] bg-white hover:bg-emerald-50/30 transition-all duration-300 min-h-[260px] text-center shadow-sm hover:shadow-md cursor-pointer">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-[#00C897] border border-emerald-100 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#00C897] group-hover:text-white transition-all duration-300 shadow-sm">
-              <Plus className="w-7 h-7" />
+            {/* Add New Business Card */}
+            <div className="group flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-slate-300 hover:border-[#00C897] bg-white hover:bg-emerald-50/30 transition-all duration-300 min-h-[260px] text-center shadow-sm hover:shadow-md cursor-pointer">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-[#00C897] border border-emerald-100 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#00C897] group-hover:text-white transition-all duration-300 shadow-sm">
+                <Plus className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-bold text-[#0A2540] mb-1">Daftarkan Toko Baru</h3>
+              <p className="text-xs text-slate-500 max-w-xs mb-4">
+                Miliki cabang atau konsep bisnis baru? Tambahkan ke portal owner.
+              </p>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-[#00C897] group-hover:underline">
+                Tambah Profil Bisnis <ChevronRight className="w-4 h-4" />
+              </span>
             </div>
-            <h3 className="text-base font-bold text-[#0A2540] mb-1">Daftarkan Toko Baru</h3>
-            <p className="text-xs text-slate-500 max-w-xs mb-4">
-              Miliki cabang atau konsep bisnis baru? Tambahkan ke portal owner.
-            </p>
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#00C897] group-hover:underline">
-              Tambah Profil Bisnis <ChevronRight className="w-4 h-4" />
-            </span>
           </div>
         </div>
 
@@ -486,6 +495,19 @@ export default function OwnerMenuPage() {
           </div>
         </div>
       </main>
+
+      {/* ========== HELP DRAWER SLIDE-OVER ========== */}
+      <HelpDrawer
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        onStartTour={() => setIsTourActive(true)}
+      />
+
+      {/* ========== INTERACTIVE DASHBOARD TOUR OVERLAY ========== */}
+      <DashboardTour
+        isActive={isTourActive}
+        onFinish={() => setIsTourActive(false)}
+      />
     </div>
   );
 }

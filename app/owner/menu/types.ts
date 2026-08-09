@@ -60,3 +60,17 @@ export interface Notification {
   type: "info" | "warning" | "success";
   store?: string;
 }
+
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  category: "umum" | "laporan" | "pos" | "pembayaran";
+}
+
+export interface TourStep {
+  targetId: string;
+  title: string;
+  description: string;
+  position: "top" | "bottom" | "left" | "right";
+}
