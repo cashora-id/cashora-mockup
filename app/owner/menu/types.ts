@@ -74,3 +74,23 @@ export interface TourStep {
   description: string;
   position: "top" | "bottom" | "left" | "right";
 }
+
+export interface OwnerProfile {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  role: string;
+  avatarCode: string;
+  joinedDate: string;
+}
+
+export interface ActiveSession {
+  id: string;
+  device: string;
+  os: string;
+  location: string;
+  ip: string;
+  isActive: boolean;
+  lastActive: string;
+}
