@@ -32,8 +32,8 @@ import {
   Wallet,
   ShoppingBag,
   Receipt,
-  Layers,
-  ArrowUpRight,
+  Eye,
+  EyeOff,
   Filter
 } from "lucide-react";
 
@@ -55,13 +55,24 @@ interface Business {
   growth: string;
 }
 
-interface ChartPoint {
-  label: string;
+interface StoreDataVal {
   sales: number;
   salesFormatted: string;
   expenses: number;
   expensesFormatted: string;
-  topOutlet: string;
+}
+
+interface ChartPoint {
+  label: string;
+  totalSales: number;
+  totalSalesFormatted: string;
+  totalExpenses: number;
+  totalExpensesFormatted: string;
+  stores: {
+    budiRetail: StoreDataVal;
+    warungPakBudi: StoreDataVal;
+    kopiBudi: StoreDataVal;
+  };
 }
 
 interface PeriodData {
@@ -80,7 +91,14 @@ interface PeriodData {
   expenseCategories: { category: string; amount: string; percent: number; icon: any }[];
 }
 
-// --- Data Store ---
+// --- Store Definitions ---
+const STORE_SERIES = [
+  { key: "total", label: "Total Combined", color: "#0A2540", strokeWidth: 3.5, isTotal: true },
+  { key: "budiRetail", label: "Budi Retail Mart", color: "#3B82F6", strokeWidth: 2.5, isTotal: false },
+  { key: "warungPakBudi", label: "Warung Makan Pak Budi", color: "#10B981", strokeWidth: 2.5, isTotal: false },
+  { key: "kopiBudi", label: "Kopi Budi Sejahtera", color: "#F59E0B", strokeWidth: 2.5, isTotal: false },
+];
+
 const businesses: Business[] = [
   {
     id: "1",
@@ -129,12 +147,78 @@ const dashboardData: Record<PeriodType, PeriodData> = {
     totalTransactions: 431,
     avgOrderValue: "Rp 25.660",
     chartPoints: [
-      { label: "08:00", sales: 850000, salesFormatted: "Rp 850rb", expenses: 320000, expensesFormatted: "Rp 320rb", topOutlet: "Budi Retail Mart" },
-      { label: "10:00", sales: 1620000, salesFormatted: "Rp 1,62Jt", expenses: 450000, expensesFormatted: "Rp 450rb", topOutlet: "Budi Retail Mart" },
-      { label: "12:00", sales: 2950000, salesFormatted: "Rp 2,95Jt", expenses: 980000, expensesFormatted: "Rp 980rb", topOutlet: "Warung Makan Pak Budi" },
-      { label: "14:00", sales: 1840000, salesFormatted: "Rp 1,84Jt", expenses: 510000, expensesFormatted: "Rp 510rb", topOutlet: "Budi Retail Mart" },
-      { label: "16:00", sales: 1420000, salesFormatted: "Rp 1,42Jt", expenses: 390000, expensesFormatted: "Rp 390rb", topOutlet: "Budi Retail Mart" },
-      { label: "18:00", sales: 2380000, salesFormatted: "Rp 2,38Jt", expenses: 770000, expensesFormatted: "Rp 770rb", topOutlet: "Warung Makan Pak Budi" }
+      {
+        label: "08:00",
+        totalSales: 850000,
+        totalSalesFormatted: "Rp 850rb",
+        totalExpenses: 320000,
+        totalExpensesFormatted: "Rp 320rb",
+        stores: {
+          budiRetail: { sales: 550000, salesFormatted: "Rp 550rb", expenses: 210000, expensesFormatted: "Rp 210rb" },
+          warungPakBudi: { sales: 300000, salesFormatted: "Rp 300rb", expenses: 110000, expensesFormatted: "Rp 110rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "10:00",
+        totalSales: 1620000,
+        totalSalesFormatted: "Rp 1,62Jt",
+        totalExpenses: 450000,
+        totalExpensesFormatted: "Rp 450rb",
+        stores: {
+          budiRetail: { sales: 1050000, salesFormatted: "Rp 1,05Jt", expenses: 290000, expensesFormatted: "Rp 290rb" },
+          warungPakBudi: { sales: 570000, salesFormatted: "Rp 570rb", expenses: 160000, expensesFormatted: "Rp 160rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "12:00",
+        totalSales: 2950000,
+        totalSalesFormatted: "Rp 2,95Jt",
+        totalExpenses: 980000,
+        totalExpensesFormatted: "Rp 980rb",
+        stores: {
+          budiRetail: { sales: 1600000, salesFormatted: "Rp 1,60Jt", expenses: 520000, expensesFormatted: "Rp 520rb" },
+          warungPakBudi: { sales: 1350000, salesFormatted: "Rp 1,35Jt", expenses: 460000, expensesFormatted: "Rp 460rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "14:00",
+        totalSales: 1840000,
+        totalSalesFormatted: "Rp 1,84Jt",
+        totalExpenses: 510000,
+        totalExpensesFormatted: "Rp 510rb",
+        stores: {
+          budiRetail: { sales: 1240000, salesFormatted: "Rp 1,24Jt", expenses: 340000, expensesFormatted: "Rp 340rb" },
+          warungPakBudi: { sales: 600000, salesFormatted: "Rp 600rb", expenses: 170000, expensesFormatted: "Rp 170rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "16:00",
+        totalSales: 1420000,
+        totalSalesFormatted: "Rp 1,42Jt",
+        totalExpenses: 390000,
+        totalExpensesFormatted: "Rp 390rb",
+        stores: {
+          budiRetail: { sales: 980000, salesFormatted: "Rp 980rb", expenses: 260000, expensesFormatted: "Rp 260rb" },
+          warungPakBudi: { sales: 440000, salesFormatted: "Rp 440rb", expenses: 130000, expensesFormatted: "Rp 130rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "18:00",
+        totalSales: 2380000,
+        totalSalesFormatted: "Rp 2,38Jt",
+        totalExpenses: 770000,
+        totalExpensesFormatted: "Rp 770rb",
+        stores: {
+          budiRetail: { sales: 1300000, salesFormatted: "Rp 1,30Jt", expenses: 420000, expensesFormatted: "Rp 420rb" },
+          warungPakBudi: { sales: 1080000, salesFormatted: "Rp 1,08Jt", expenses: 350000, expensesFormatted: "Rp 350rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      }
     ],
     storeContributions: [
       { name: "Budi Retail Mart", amount: "Rp 7.210.000", percent: 65.2, color: "#3B82F6" },
@@ -164,12 +248,78 @@ const dashboardData: Record<PeriodType, PeriodData> = {
     totalTransactions: 382,
     avgOrderValue: "Rp 25.340",
     chartPoints: [
-      { label: "08:00", sales: 710000, salesFormatted: "Rp 710rb", expenses: 290000, expensesFormatted: "Rp 290rb", topOutlet: "Budi Retail Mart" },
-      { label: "10:00", sales: 1450000, salesFormatted: "Rp 1,45Jt", expenses: 410000, expensesFormatted: "Rp 410rb", topOutlet: "Budi Retail Mart" },
-      { label: "12:00", sales: 2610000, salesFormatted: "Rp 2,61Jt", expenses: 910000, expensesFormatted: "Rp 910rb", topOutlet: "Warung Makan Pak Budi" },
-      { label: "14:00", sales: 1680000, salesFormatted: "Rp 1,68Jt", expenses: 480000, expensesFormatted: "Rp 480rb", topOutlet: "Budi Retail Mart" },
-      { label: "16:00", sales: 1290000, salesFormatted: "Rp 1,29Jt", expenses: 360000, expensesFormatted: "Rp 360rb", topOutlet: "Budi Retail Mart" },
-      { label: "18:00", sales: 1940000, salesFormatted: "Rp 1,94Jt", expenses: 700000, expensesFormatted: "Rp 700rb", topOutlet: "Warung Makan Pak Budi" }
+      {
+        label: "08:00",
+        totalSales: 710000,
+        totalSalesFormatted: "Rp 710rb",
+        totalExpenses: 290000,
+        totalExpensesFormatted: "Rp 290rb",
+        stores: {
+          budiRetail: { sales: 460000, salesFormatted: "Rp 460rb", expenses: 190000, expensesFormatted: "Rp 190rb" },
+          warungPakBudi: { sales: 250000, salesFormatted: "Rp 250rb", expenses: 100000, expensesFormatted: "Rp 100rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "10:00",
+        totalSales: 1450000,
+        totalSalesFormatted: "Rp 1,45Jt",
+        totalExpenses: 410000,
+        totalExpensesFormatted: "Rp 410rb",
+        stores: {
+          budiRetail: { sales: 920000, salesFormatted: "Rp 920rb", expenses: 260000, expensesFormatted: "Rp 260rb" },
+          warungPakBudi: { sales: 530000, salesFormatted: "Rp 530rb", expenses: 150000, expensesFormatted: "Rp 150rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "12:00",
+        totalSales: 2610000,
+        totalSalesFormatted: "Rp 2,61Jt",
+        totalExpenses: 910000,
+        totalExpensesFormatted: "Rp 910rb",
+        stores: {
+          budiRetail: { sales: 1450000, salesFormatted: "Rp 1,45Jt", expenses: 490000, expensesFormatted: "Rp 490rb" },
+          warungPakBudi: { sales: 1160000, salesFormatted: "Rp 1,16Jt", expenses: 420000, expensesFormatted: "Rp 420rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "14:00",
+        totalSales: 1680000,
+        totalSalesFormatted: "Rp 1,68Jt",
+        totalExpenses: 480000,
+        totalExpensesFormatted: "Rp 480rb",
+        stores: {
+          budiRetail: { sales: 1120000, salesFormatted: "Rp 1,12Jt", expenses: 320000, expensesFormatted: "Rp 320rb" },
+          warungPakBudi: { sales: 560000, salesFormatted: "Rp 560rb", expenses: 160000, expensesFormatted: "Rp 160rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "16:00",
+        totalSales: 1290000,
+        totalSalesFormatted: "Rp 1,29Jt",
+        totalExpenses: 360000,
+        totalExpensesFormatted: "Rp 360rb",
+        stores: {
+          budiRetail: { sales: 880000, salesFormatted: "Rp 880rb", expenses: 240000, expensesFormatted: "Rp 240rb" },
+          warungPakBudi: { sales: 410000, salesFormatted: "Rp 410rb", expenses: 120000, expensesFormatted: "Rp 120rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "18:00",
+        totalSales: 1940000,
+        totalSalesFormatted: "Rp 1,94Jt",
+        totalExpenses: 700000,
+        totalExpensesFormatted: "Rp 700rb",
+        stores: {
+          budiRetail: { sales: 1300000, salesFormatted: "Rp 1,30Jt", expenses: 440000, expensesFormatted: "Rp 440rb" },
+          warungPakBudi: { sales: 640000, salesFormatted: "Rp 640rb", expenses: 260000, expensesFormatted: "Rp 260rb" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      }
     ],
     storeContributions: [
       { name: "Budi Retail Mart", amount: "Rp 6.130.000", percent: 63.3, color: "#3B82F6" },
@@ -199,13 +349,90 @@ const dashboardData: Record<PeriodType, PeriodData> = {
     totalTransactions: 2910,
     avgOrderValue: "Rp 25.510",
     chartPoints: [
-      { label: "Senin 3", sales: 9200000, salesFormatted: "Rp 9,2Jt", expenses: 2800000, expensesFormatted: "Rp 2,8Jt", topOutlet: "Budi Retail Mart" },
-      { label: "Selasa 4", sales: 10500000, salesFormatted: "Rp 10,5Jt", expenses: 3100000, expensesFormatted: "Rp 3,1Jt", topOutlet: "Budi Retail Mart" },
-      { label: "Rabu 5", sales: 8700000, salesFormatted: "Rp 8,7Jt", expenses: 2900000, expensesFormatted: "Rp 2,9Jt", topOutlet: "Warung Makan Pak Budi" },
-      { label: "Kamis 6", sales: 11800000, salesFormatted: "Rp 11,8Jt", expenses: 3500000, expensesFormatted: "Rp 3,5Jt", topOutlet: "Budi Retail Mart" },
-      { label: "Jumat 7", sales: 12400000, salesFormatted: "Rp 12,4Jt", expenses: 3600000, expensesFormatted: "Rp 3,6Jt", topOutlet: "Budi Retail Mart" },
-      { label: "Sabtu 8", sales: 10580000, salesFormatted: "Rp 10,5Jt", expenses: 3520000, expensesFormatted: "Rp 3,5Jt", topOutlet: "Warung Makan Pak Budi" },
-      { label: "Minggu 9", sales: 11060000, salesFormatted: "Rp 11,0Jt", expenses: 3420000, expensesFormatted: "Rp 3,4Jt", topOutlet: "Budi Retail Mart" }
+      {
+        label: "Senin 3",
+        totalSales: 9200000,
+        totalSalesFormatted: "Rp 9,2Jt",
+        totalExpenses: 2800000,
+        totalExpensesFormatted: "Rp 2,8Jt",
+        stores: {
+          budiRetail: { sales: 5880000, salesFormatted: "Rp 5.88Jt", expenses: 1790000, expensesFormatted: "Rp 1.79Jt" },
+          warungPakBudi: { sales: 3320000, salesFormatted: "Rp 3.32Jt", expenses: 1010000, expensesFormatted: "Rp 1.01Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "Selasa 4",
+        totalSales: 10500000,
+        totalSalesFormatted: "Rp 10,5Jt",
+        totalExpenses: 3100000,
+        totalExpensesFormatted: "Rp 3,1Jt",
+        stores: {
+          budiRetail: { sales: 6720000, salesFormatted: "Rp 6.72Jt", expenses: 1980000, expensesFormatted: "Rp 1.98Jt" },
+          warungPakBudi: { sales: 3780000, salesFormatted: "Rp 3.78Jt", expenses: 1120000, expensesFormatted: "Rp 1.12Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "Rabu 5",
+        totalSales: 8700000,
+        totalSalesFormatted: "Rp 8,7Jt",
+        totalExpenses: 2900000,
+        totalExpensesFormatted: "Rp 2,9Jt",
+        stores: {
+          budiRetail: { sales: 5220000, salesFormatted: "Rp 5.22Jt", expenses: 1740000, expensesFormatted: "Rp 1.74Jt" },
+          warungPakBudi: { sales: 3480000, salesFormatted: "Rp 3.48Jt", expenses: 1160000, expensesFormatted: "Rp 1.16Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "Kamis 6",
+        totalSales: 11800000,
+        totalSalesFormatted: "Rp 11,8Jt",
+        totalExpenses: 3500000,
+        totalExpensesFormatted: "Rp 3,5Jt",
+        stores: {
+          budiRetail: { sales: 7552000, salesFormatted: "Rp 7.55Jt", expenses: 2240000, expensesFormatted: "Rp 2.24Jt" },
+          warungPakBudi: { sales: 4248000, salesFormatted: "Rp 4.24Jt", expenses: 1260000, expensesFormatted: "Rp 1.26Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "Jumat 7",
+        totalSales: 12400000,
+        totalSalesFormatted: "Rp 12,4Jt",
+        totalExpenses: 3600000,
+        totalExpensesFormatted: "Rp 3,6Jt",
+        stores: {
+          budiRetail: { sales: 7936000, salesFormatted: "Rp 7.93Jt", expenses: 2304000, expensesFormatted: "Rp 2.30Jt" },
+          warungPakBudi: { sales: 4464000, salesFormatted: "Rp 4.46Jt", expenses: 1296000, expensesFormatted: "Rp 1.29Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "Sabtu 8",
+        totalSales: 10580000,
+        totalSalesFormatted: "Rp 10,5Jt",
+        totalExpenses: 3520000,
+        totalExpensesFormatted: "Rp 3,5Jt",
+        stores: {
+          budiRetail: { sales: 6771200, salesFormatted: "Rp 6.77Jt", expenses: 2252800, expensesFormatted: "Rp 2.25Jt" },
+          warungPakBudi: { sales: 3808800, salesFormatted: "Rp 3.80Jt", expenses: 1267200, expensesFormatted: "Rp 1.26Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "Minggu 9",
+        totalSales: 11060000,
+        totalSalesFormatted: "Rp 11,0Jt",
+        totalExpenses: 3420000,
+        totalExpensesFormatted: "Rp 3,4Jt",
+        stores: {
+          budiRetail: { sales: 7210000, salesFormatted: "Rp 7.21Jt", expenses: 2230000, expensesFormatted: "Rp 2.23Jt" },
+          warungPakBudi: { sales: 3850000, salesFormatted: "Rp 3.85Jt", expenses: 1190000, expensesFormatted: "Rp 1.19Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      }
     ],
     storeContributions: [
       { name: "Budi Retail Mart", amount: "Rp 47.500.000", percent: 64.0, color: "#3B82F6" },
@@ -235,10 +462,54 @@ const dashboardData: Record<PeriodType, PeriodData> = {
     totalTransactions: 12480,
     avgOrderValue: "Rp 25.520",
     chartPoints: [
-      { label: "W1 (10-16 Jul)", sales: 72500000, salesFormatted: "Rp 72,5Jt", expenses: 22800000, expensesFormatted: "Rp 22,8Jt", topOutlet: "Budi Retail Mart" },
-      { label: "W2 (17-23 Jul)", sales: 78100000, salesFormatted: "Rp 78,1Jt", expenses: 24100000, expensesFormatted: "Rp 24,1Jt", topOutlet: "Budi Retail Mart" },
-      { label: "W3 (24-30 Jul)", sales: 81400000, salesFormatted: "Rp 81,4Jt", expenses: 25300000, expensesFormatted: "Rp 25,3Jt", topOutlet: "Budi Retail Mart" },
-      { label: "W4 (31 Jul-9 Aug)", sales: 86500000, salesFormatted: "Rp 86,5Jt", expenses: 26200000, expensesFormatted: "Rp 26,2Jt", topOutlet: "Warung Makan Pak Budi" }
+      {
+        label: "W1 (10-16 Jul)",
+        totalSales: 72500000,
+        totalSalesFormatted: "Rp 72,5Jt",
+        totalExpenses: 22800000,
+        totalExpensesFormatted: "Rp 22,8Jt",
+        stores: {
+          budiRetail: { sales: 46400000, salesFormatted: "Rp 46,4Jt", expenses: 14592000, expensesFormatted: "Rp 14,5Jt" },
+          warungPakBudi: { sales: 26100000, salesFormatted: "Rp 26,1Jt", expenses: 8208000, expensesFormatted: "Rp 8,2Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "W2 (17-23 Jul)",
+        totalSales: 78100000,
+        totalSalesFormatted: "Rp 78,1Jt",
+        totalExpenses: 24100000,
+        totalExpensesFormatted: "Rp 24,1Jt",
+        stores: {
+          budiRetail: { sales: 49984000, salesFormatted: "Rp 49,9Jt", expenses: 15424000, expensesFormatted: "Rp 15,4Jt" },
+          warungPakBudi: { sales: 28116000, salesFormatted: "Rp 28,1Jt", expenses: 8676000, expensesFormatted: "Rp 8,6Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "W3 (24-30 Jul)",
+        totalSales: 81400000,
+        totalSalesFormatted: "Rp 81,4Jt",
+        totalExpenses: 25300000,
+        totalExpensesFormatted: "Rp 25,3Jt",
+        stores: {
+          budiRetail: { sales: 52096000, salesFormatted: "Rp 52,0Jt", expenses: 16192000, expensesFormatted: "Rp 16,1Jt" },
+          warungPakBudi: { sales: 29304000, salesFormatted: "Rp 29,3Jt", expenses: 9108000, expensesFormatted: "Rp 9,1Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      },
+      {
+        label: "W4 (31 Jul-9 Aug)",
+        totalSales: 86500000,
+        totalSalesFormatted: "Rp 86,5Jt",
+        totalExpenses: 26200000,
+        totalExpensesFormatted: "Rp 26,2Jt",
+        stores: {
+          budiRetail: { sales: 55360000, salesFormatted: "Rp 55,3Jt", expenses: 16768000, expensesFormatted: "Rp 16,7Jt" },
+          warungPakBudi: { sales: 31140000, salesFormatted: "Rp 31,1Jt", expenses: 9432000, expensesFormatted: "Rp 9,4Jt" },
+          kopiBudi: { sales: 0, salesFormatted: "Rp 0", expenses: 0, expensesFormatted: "Rp 0" }
+        }
+      }
     ],
     storeContributions: [
       { name: "Budi Retail Mart", amount: "Rp 203.840.000", percent: 64.0, color: "#3B82F6" },
@@ -264,12 +535,24 @@ export default function OwnerMenuPage() {
   const [activeMetricTab, setActiveMetricTab] = useState<MetricTabType>("sales");
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
 
+  // Line Visibility Toggles
+  const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>({
+    total: true,
+    budiRetail: true,
+    warungPakBudi: true,
+    kopiBudi: true,
+  });
+
   // Business List States
   const [businessList] = useState<Business[]>(businesses);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeStoreTab, setActiveStoreTab] = useState<"all" | "active" | "maintenance">("all");
 
   const activeData = dashboardData[selectedPeriod];
+
+  const toggleLineVisibility = (key: string) => {
+    setVisibleLines((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const filteredBusinesses = businessList.filter((b) => {
     const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -354,7 +637,7 @@ export default function OwnerMenuPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[#00C897] text-xs font-semibold border border-white/10 mb-2">
-                <Sparkles className="w-3.5 h-3.5" /> Dasbor Agregat Multi-Toko
+                <Sparkles className="w-3.5 h-3.5" /> Dasbor Agregat & Kurva Multi-Toko
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 Ringkasan Kinerja Bisnis
@@ -464,17 +747,17 @@ export default function OwnerMenuPage() {
         </div>
       </section>
 
-      {/* ========== DYNAMIC VISUAL CHART & BREAKDOWN SECTION ========== */}
+      {/* ========== MULTI-LINE SVG CHART & BREAKDOWN SECTION ========== */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-20 pb-20">
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 mb-10">
           {/* Chart Header & Toggles */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100">
             <div>
               <h2 className="text-lg sm:text-xl font-extrabold text-[#0A2540] tracking-tight">
-                Tren & Agregasi Grafik Global
+                Perbandingan Grafik Kurva per Toko
               </h2>
               <p className="text-xs text-slate-500">
-                Visualisasi kumulatif dari seluruh cabang usaha Cashora
+                Bandingkan tren {activeMetricTab === "sales" ? "penjualan" : "pengeluaran"} individual toko dengan garis total agregat
               </p>
             </div>
 
@@ -505,11 +788,45 @@ export default function OwnerMenuPage() {
             </div>
           </div>
 
-          {/* Dynamic SVG Area / Line Chart */}
-          <div className="relative w-full h-64 sm:h-72 mb-8 bg-slate-50/70 rounded-2xl p-4 border border-slate-100">
-            <InteractiveSvgChart
+          {/* Clickable Legend Pills (Line Visibility Toggles) */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="text-xs font-bold text-slate-400 mr-1 flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5" /> Toggle Garis:
+            </span>
+
+            {STORE_SERIES.map((s) => {
+              const isVisible = visibleLines[s.key];
+              return (
+                <button
+                  key={s.key}
+                  onClick={() => toggleLineVisibility(s.key)}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                    isVisible
+                      ? "bg-slate-50 border-slate-300 text-slate-800 shadow-sm"
+                      : "bg-slate-100/60 border-slate-200 text-slate-400 opacity-60 line-through"
+                  }`}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: s.color }}
+                  />
+                  <span>{s.label}</span>
+                  {isVisible ? (
+                    <Eye className="w-3 h-3 text-slate-500" />
+                  ) : (
+                    <EyeOff className="w-3 h-3 text-slate-400" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Multi-Line SVG Chart */}
+          <div className="relative w-full h-72 sm:h-80 mb-8 bg-slate-50/70 rounded-2xl p-4 border border-slate-100">
+            <MultiLineSvgChart
               points={activeData.chartPoints}
               activeTab={activeMetricTab}
+              visibleLines={visibleLines}
               hoveredIndex={hoveredPointIndex}
               onHover={setHoveredPointIndex}
             />
@@ -715,68 +1032,90 @@ export default function OwnerMenuPage() {
   );
 }
 
-// --- Interactive SVG Chart Component ---
-function InteractiveSvgChart({
+// --- Multi-Line SVG Chart Component ---
+function MultiLineSvgChart({
   points,
   activeTab,
+  visibleLines,
   hoveredIndex,
   onHover,
 }: {
   points: ChartPoint[];
   activeTab: MetricTabType;
+  visibleLines: Record<string, boolean>;
   hoveredIndex: number | null;
   onHover: (idx: number | null) => void;
 }) {
   const isSales = activeTab === "sales";
-  const strokeColor = isSales ? "#00C897" : "#F43F5E";
-  const fillColor = isSales ? "rgba(0, 200, 151, 0.15)" : "rgba(244, 63, 94, 0.15)";
 
-  const values = points.map((p) => (isSales ? p.sales : p.expenses));
-  const maxVal = Math.max(...values, 1) * 1.15;
+  // Calculate Max Value across all series to normalize scaling
+  let allVals: number[] = [];
+  points.forEach((p) => {
+    if (isSales) {
+      allVals.push(p.totalSales, p.stores.budiRetail.sales, p.stores.warungPakBudi.sales, p.stores.kopiBudi.sales);
+    } else {
+      allVals.push(p.totalExpenses, p.stores.budiRetail.expenses, p.stores.warungPakBudi.expenses, p.stores.kopiBudi.expenses);
+    }
+  });
+
+  const maxVal = Math.max(...allVals, 1) * 1.15;
   const minVal = 0;
 
   const width = 700;
-  const height = 200;
+  const height = 220;
   const paddingX = 40;
   const paddingY = 30;
 
-  // Calculate coordinates
-  const coords = points.map((pt, idx) => {
-    const x = paddingX + (idx / (points.length - 1 || 1)) * (width - 2 * paddingX);
-    const val = isSales ? pt.sales : pt.expenses;
-    const y = height - paddingY - ((val - minVal) / (maxVal - minVal)) * (height - 2 * paddingY);
-    return { x, y, pt };
-  });
+  // Helper to get series value for a point
+  const getVal = (pt: ChartPoint, seriesKey: string): number => {
+    if (seriesKey === "total") return isSales ? pt.totalSales : pt.totalExpenses;
+    if (seriesKey === "budiRetail") return isSales ? pt.stores.budiRetail.sales : pt.stores.budiRetail.expenses;
+    if (seriesKey === "warungPakBudi") return isSales ? pt.stores.warungPakBudi.sales : pt.stores.warungPakBudi.expenses;
+    if (seriesKey === "kopiBudi") return isSales ? pt.stores.kopiBudi.sales : pt.stores.kopiBudi.expenses;
+    return 0;
+  };
 
-  // Construct SVG Path String (Smooth Bezier Curve)
-  let d = "";
-  if (coords.length > 0) {
-    d = `M ${coords[0].x} ${coords[0].y}`;
+  // Build Bezier Path string for a series
+  const buildPath = (seriesKey: string) => {
+    const coords = points.map((pt, idx) => {
+      const x = paddingX + (idx / (points.length - 1 || 1)) * (width - 2 * paddingX);
+      const val = getVal(pt, seriesKey);
+      const y = height - paddingY - ((val - minVal) / (maxVal - minVal)) * (height - 2 * paddingY);
+      return { x, y };
+    });
+
+    if (coords.length === 0) return "";
+    let d = `M ${coords[0].x} ${coords[0].y}`;
     for (let i = 0; i < coords.length - 1; i++) {
       const curr = coords[i];
       const next = coords[i + 1];
       const cpX = (curr.x + next.x) / 2;
       d += ` C ${cpX} ${curr.y}, ${cpX} ${next.y}, ${next.x} ${next.y}`;
     }
-  }
+    return { d, coords };
+  };
 
-  // Area Path
-  const areaD = coords.length > 0
-    ? `${d} L ${coords[coords.length - 1].x} ${height - paddingY} L ${coords[0].x} ${height - paddingY} Z`
+  // Build Area Path for Total Line
+  const totalPathData = buildPath("total");
+  const totalAreaD = totalPathData.coords && totalPathData.coords.length > 0
+    ? `${totalPathData.d} L ${totalPathData.coords[totalPathData.coords.length - 1].x} ${height - paddingY} L ${totalPathData.coords[0].x} ${height - paddingY} Z`
     : "";
 
-  const activeHover = hoveredIndex !== null ? coords[hoveredIndex] : null;
+  const activeHoverPt = hoveredIndex !== null ? points[hoveredIndex] : null;
+  const activeHoverX = hoveredIndex !== null
+    ? paddingX + (hoveredIndex / (points.length - 1 || 1)) * (width - 2 * paddingX)
+    : 0;
 
   return (
     <div className="w-full h-full relative flex flex-col justify-between">
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
         <defs>
-          <linearGradient id="chartGradientSales" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#00C897" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#00C897" stopOpacity="0.0" />
+          <linearGradient id="multiChartGradientSales" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#0A2540" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#0A2540" stopOpacity="0.0" />
           </linearGradient>
-          <linearGradient id="chartGradientExpenses" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.3" />
+          <linearGradient id="multiChartGradientExpenses" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#F43F5E" stopOpacity="0.0" />
           </linearGradient>
         </defs>
@@ -798,66 +1137,112 @@ function InteractiveSvgChart({
           );
         })}
 
-        {/* Shaded Area Fill */}
-        <path
-          d={areaD}
-          fill={isSales ? "url(#chartGradientSales)" : "url(#chartGradientExpenses)"}
-          className="transition-all duration-500"
-        />
+        {/* Shaded Area Fill under Total Line */}
+        {visibleLines.total && (
+          <path
+            d={totalAreaD}
+            fill={isSales ? "url(#multiChartGradientSales)" : "url(#multiChartGradientExpenses)"}
+            className="transition-all duration-500"
+          />
+        )}
 
-        {/* Curve Path */}
-        <path
-          d={d}
-          fill="none"
-          stroke={strokeColor}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          className="transition-all duration-500"
-        />
+        {/* Render Each Enabled Store Line */}
+        {STORE_SERIES.map((s) => {
+          if (!visibleLines[s.key]) return null;
+          const { d, coords } = buildPath(s.key);
+          const isTotal = s.isTotal;
 
-        {/* Interactive Data Point Nodes */}
-        {coords.map((c, idx) => (
-          <g key={idx} className="cursor-pointer" onMouseEnter={() => onHover(idx)}>
-            <circle
-              cx={c.x}
-              cy={c.y}
-              r={hoveredIndex === idx ? "7" : "4.5"}
-              fill={strokeColor}
-              stroke="#FFFFFF"
-              strokeWidth="2.5"
-              className="transition-all duration-200"
-            />
-          </g>
-        ))}
+          return (
+            <g key={s.key}>
+              <path
+                d={d}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={isTotal ? "3.5" : "2.5"}
+                strokeDasharray={isTotal ? undefined : "none"}
+                strokeLinecap="round"
+                className="transition-all duration-500"
+              />
 
-        {/* Hover Guideline */}
-        {activeHover && (
+              {/* Data Point Nodes for this line */}
+              {coords.map((c, idx) => (
+                <circle
+                  key={idx}
+                  cx={c.x}
+                  cy={c.y}
+                  r={hoveredIndex === idx ? (isTotal ? "6" : "5") : (isTotal ? "4" : "3")}
+                  fill={s.color}
+                  stroke="#FFFFFF"
+                  strokeWidth="2"
+                  className="transition-all duration-200 cursor-pointer"
+                  onMouseEnter={() => onHover(idx)}
+                />
+              ))}
+            </g>
+          );
+        })}
+
+        {/* Hover Vertical Guideline */}
+        {hoveredIndex !== null && (
           <line
-            x1={activeHover.x}
+            x1={activeHoverX}
             y1={paddingY}
-            x2={activeHover.x}
+            x2={activeHoverX}
             y2={height - paddingY}
-            stroke={strokeColor}
+            stroke="#0A2540"
             strokeWidth="1.5"
             strokeDasharray="3 3"
           />
         )}
       </svg>
 
-      {/* Hover Floating Tooltip */}
-      {activeHover && (
+      {/* Multi-Series Hover Tooltip */}
+      {hoveredIndex !== null && activeHoverPt && (
         <div
-          className="absolute z-30 bg-[#0A2540] text-white p-2.5 rounded-xl shadow-xl border border-slate-700 pointer-events-none transform -translate-x-1/2 -translate-y-full transition-all duration-150"
+          className="absolute z-30 bg-[#0A2540] text-white p-3 rounded-2xl shadow-2xl border border-slate-700 pointer-events-none transform -translate-x-1/2 -translate-y-full transition-all duration-150 min-w-[210px]"
           style={{
-            left: `${(activeHover.x / width) * 100}%`,
-            top: `${(activeHover.y / height) * 100 - 10}%`,
+            left: `${(activeHoverX / width) * 100}%`,
+            top: `20%`,
           }}
         >
-          <p className="text-[10px] text-slate-300 font-medium">{activeHover.pt.label}</p>
-          <p className="text-xs font-black text-[#00C897]">
-            {isSales ? activeHover.pt.salesFormatted : activeHover.pt.expensesFormatted}
-          </p>
-          <p className="text-[9px] text-slate-400 mt-0.5">Top: {activeHover.pt.topOutlet}</p>
+          <div className="flex items-center justify-between border-b border-slate-700 pb-1.5 mb-2">
+            <span className="text-[11px] font-bold text-slate-300">{activeHoverPt.label}</span>
+            <span className="text-[10px] font-extrabold text-[#00C897]">
+              {isSales ? activeHoverPt.totalSalesFormatted : activeHoverPt.totalExpensesFormatted} Total
+            </span>
+          </div>
+
+          <div className="space-y-1.5 text-[10px]">
+            <div className="flex items-center justify-between text-blue-300 font-semibold">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                Budi Retail Mart:
+              </span>
+              <span className="font-extrabold text-white">
+                {isSales ? activeHoverPt.stores.budiRetail.salesFormatted : activeHoverPt.stores.budiRetail.expensesFormatted}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-emerald-300 font-semibold">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                Warung Pak Budi:
+              </span>
+              <span className="font-extrabold text-white">
+                {isSales ? activeHoverPt.stores.warungPakBudi.salesFormatted : activeHoverPt.stores.warungPakBudi.expensesFormatted}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-amber-300 font-semibold opacity-70">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                Kopi Budi Sejahtera:
+              </span>
+              <span className="font-extrabold text-white">
+                {isSales ? activeHoverPt.stores.kopiBudi.salesFormatted : activeHoverPt.stores.kopiBudi.expensesFormatted}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
