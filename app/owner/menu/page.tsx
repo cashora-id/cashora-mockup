@@ -280,7 +280,7 @@ export default function OwnerMenuPage() {
           </div>
 
           {/* Multi-Line SVG Chart */}
-          <div className="relative w-full h-72 sm:h-80 mb-8 bg-slate-50/70 rounded-2xl p-4 border border-slate-100">
+          <div className="relative w-full h-72 sm:h-80 mb-8 bg-slate-50/70 rounded-2xl p-2 sm:p-3 border border-slate-100">
             <MultiLineSvgChart
               points={activeData.chartPoints}
               activeTab={activeMetricTab}

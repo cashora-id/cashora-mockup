@@ -34,12 +34,13 @@ export function MultiLineSvgChart({
   const maxVal = rawMax * 1.15;
   const minVal = 0;
 
-  const width = 740;
-  const height = 240;
-  const paddingLeft = 60;
-  const paddingRight = 35;
+  // Expanded viewBox width & tighter margins so curves stretch horizontally across the viewBox
+  const width = 960;
+  const height = 260;
+  const paddingLeft = 45;
+  const paddingRight = 20;
   const paddingTop = 25;
-  const paddingBottom = 40;
+  const paddingBottom = 35;
 
   // Helper to format currency for Y-Axis labels
   const formatYLabel = (val: number) => {
@@ -129,7 +130,7 @@ export function MultiLineSvgChart({
                 strokeWidth="1"
               />
               <text
-                x={paddingLeft - 10}
+                x={paddingLeft - 8}
                 y={yPos + 4}
                 textAnchor="end"
                 className="text-[10px] font-semibold fill-slate-400"
@@ -160,7 +161,7 @@ export function MultiLineSvgChart({
               {/* Perfectly aligned X-Axis Time Label */}
               <text
                 x={xPos}
-                y={height - 12}
+                y={height - 10}
                 textAnchor="middle"
                 className={`text-[11px] transition-all cursor-pointer ${
                   isHovered
