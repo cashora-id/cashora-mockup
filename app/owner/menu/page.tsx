@@ -1084,7 +1084,7 @@ function MultiLineSvgChart({
       return { x, y };
     });
 
-    if (coords.length === 0) return "";
+    if (coords.length === 0) return { d: "", coords: [] };
     let d = `M ${coords[0].x} ${coords[0].y}`;
     for (let i = 0; i < coords.length - 1; i++) {
       const curr = coords[i];
