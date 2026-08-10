@@ -1,23 +1,58 @@
 "use client";
 
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Utensils,
   Coffee,
   Store,
+  Warehouse,
+  Wrench,
   CheckCircle2,
   AlertTriangle,
   TrendingUp,
-  ArrowRight
+  ArrowRight,
+  MoreVertical,
+  PauseCircle,
+  PlayCircle,
+  Trash2,
+  Pencil,
 } from "lucide-react";
 import { Business } from "../types";
 
-export function BusinessCard({
-  business,
-}: {
+interface BusinessCardProps {
   business: Business;
-}) {
+  onToggleStatus: (id: string) => void;
+  onDeleteRequest: (id: string) => void;
+  onEditRequest: (id: string) => void;
+}
+
+export function BusinessCard({ business, onToggleStatus, onDeleteRequest, onEditRequest }: BusinessCardProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const isActive = business.status === "active";
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  // Close dropdown on Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [menuOpen]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -25,10 +60,31 @@ export function BusinessCard({
         return <Utensils className="w-5 h-5 text-emerald-600" />;
       case "cafe":
         return <Coffee className="w-5 h-5 text-amber-600" />;
+      case "building_materials":
+      case "wholesale_distribution":
+        return <Warehouse className="w-5 h-5 text-orange-600" />;
+      case "automotive":
+      case "services":
+        return <Wrench className="w-5 h-5 text-violet-600" />;
       default:
         return <Store className="w-5 h-5 text-blue-600" />;
     }
   };
+
+  const handleToggle = useCallback(() => {
+    setMenuOpen(false);
+    onToggleStatus(business.id);
+  }, [business.id, onToggleStatus]);
+
+  const handleDelete = useCallback(() => {
+    setMenuOpen(false);
+    onDeleteRequest(business.id);
+  }, [business.id, onDeleteRequest]);
+
+  const handleEdit = useCallback(() => {
+    setMenuOpen(false);
+    onEditRequest(business.id);
+  }, [business.id, onEditRequest]);
 
   return (
     <div
@@ -44,23 +100,84 @@ export function BusinessCard({
       />
 
       <div className="p-6 flex-1 flex flex-col">
-        {/* Header: Icon + Badge */}
+        {/* Header: Icon + Badge + Kebab */}
         <div className="flex justify-between items-start mb-5">
           <div className="w-12 h-12 p-3 rounded-2xl bg-slate-100 border border-slate-200/60 flex items-center justify-center group-hover:scale-105 transition-transform">
             {getCategoryIcon(business.category)}
           </div>
 
-          {isActive ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-extrabold border border-emerald-200/60">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              Aktif POS
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-extrabold border border-amber-200/60">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-              Maintenance
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {isActive ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-extrabold border border-emerald-200/60">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                Aktif POS
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-extrabold border border-amber-200/60">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                Maintenance
+              </span>
+            )}
+
+            {/* Kebab Menu */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen((prev) => !prev)}
+                aria-label={`Menu aksi untuk ${business.name}`}
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#00C897]/50"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+
+              {/* Dropdown */}
+              {menuOpen && (
+                <div className="absolute right-0 top-9 z-50 w-52 bg-white rounded-xl border border-slate-200 shadow-xl py-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <button
+                    onClick={handleToggle}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  >
+                    {isActive ? (
+                      <>
+                        <PauseCircle className="w-4 h-4 text-amber-500" />
+                        Jeda Operasional
+                      </>
+                    ) : (
+                      <>
+                        <PlayCircle className="w-4 h-4 text-emerald-500" />
+                        Aktifkan Kembali
+                      </>
+                    )}
+                  </button>
+
+                  {/* Edit Toko — hanya muncul saat status Maintenance */}
+                  {!isActive && (
+                    <>
+                      <div className="my-1 border-t border-slate-100" />
+                      <button
+                        onClick={handleEdit}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Edit Toko
+                      </button>
+                    </>
+                  )}
+
+                  <div className="my-1 border-t border-slate-100" />
+
+                  <button
+                    onClick={handleDelete}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Hapus Toko
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Business Title & Info */}

@@ -17,13 +17,18 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
-import { PeriodType, MetricTabType, Business, Notification } from "./types";
+import { useCallback } from "react";
+import { Business, MetricTabType, Notification, PeriodType, StoreRegistrationDraft } from "./types";
 import { STORE_SERIES, businesses, dashboardData, initialNotifications } from "./data";
 import { OwnerHeader } from "./_components/OwnerHeader";
+import { NewStoreRegistrationModal } from "./_components/NewStoreRegistrationModal";
 import { MultiLineSvgChart } from "./_components/MultiLineSvgChart";
 import { BusinessCard } from "./_components/BusinessCard";
 import { HelpDrawer } from "./_components/HelpDrawer";
 import { DashboardTour } from "./_components/DashboardTour";
+import { DeleteStoreModal } from "./_components/DeleteStoreModal";
+import { EditStoreModal } from "./_components/EditStoreModal";
+import { Toast, ToastData } from "./_components/Toast";
 
 export default function OwnerMenuPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("today");
@@ -39,8 +44,9 @@ export default function OwnerMenuPage() {
   });
 
   // Business List States
-  const [businessList] = useState<Business[]>(businesses);
+  const [businessList, setBusinessList] = useState<Business[]>(businesses);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isStoreRegistrationOpen, setIsStoreRegistrationOpen] = useState(false);
   const [activeStoreTab, setActiveStoreTab] = useState<"all" | "active" | "maintenance">("all");
 
   // Notifications State
@@ -49,6 +55,11 @@ export default function OwnerMenuPage() {
   // Help Drawer & Interactive Tour States
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isTourActive, setIsTourActive] = useState(false);
+
+  // Store Management States
+  const [deleteTarget, setDeleteTarget] = useState<Business | null>(null);
+  const [editTarget, setEditTarget] = useState<Business | null>(null);
+  const [toast, setToast] = useState<ToastData | null>(null);
 
   const activeData = dashboardData[selectedPeriod];
 
@@ -68,6 +79,83 @@ export default function OwnerMenuPage() {
 
   const handleClearAll = () => {
     setNotifications([]);
+  };
+
+  const showToast = useCallback((message: string, type: ToastData["type"]) => {
+    setToast({ id: `toast-${Date.now()}`, message, type });
+  }, []);
+
+  const dismissToast = useCallback((id: string) => {
+    setToast((prev) => (prev?.id === id ? null : prev));
+  }, []);
+
+  const handleToggleStatus = useCallback((id: string) => {
+    setBusinessList((prev) =>
+      prev.map((biz) =>
+        biz.id === id
+          ? { ...biz, status: biz.status === "active" ? "maintenance" : "active" }
+          : biz
+      )
+    );
+    const target = businessList.find((b) => b.id === id);
+    if (target) {
+      const isNowMaintenance = target.status === "active";
+      showToast(
+        isNowMaintenance
+          ? `${target.name} berhasil dijeda (maintenance).`
+          : `${target.name} berhasil diaktifkan kembali.`,
+        isNowMaintenance ? "warning" : "success"
+      );
+    }
+  }, [businessList, showToast]);
+
+  const handleDeleteRequest = useCallback((id: string) => {
+    const target = businessList.find((b) => b.id === id) ?? null;
+    setDeleteTarget(target);
+  }, [businessList]);
+
+  const handleEditRequest = useCallback((id: string) => {
+    const target = businessList.find((b) => b.id === id) ?? null;
+    // Strict guard: hanya boleh edit jika status maintenance
+    if (target && target.status !== "maintenance") return;
+    setEditTarget(target);
+  }, [businessList]);
+
+  const handleEditSave = useCallback((id: string, updates: { name: string; type: string; location: string; category: Business["category"] }) => {
+    setBusinessList((prev) =>
+      prev.map((biz) =>
+        biz.id === id ? { ...biz, ...updates } : biz
+      )
+    );
+    setEditTarget(null);
+    showToast(`${updates.name} berhasil diperbarui.`, "success");
+  }, [showToast]);
+
+  const handleDeleteConfirm = useCallback((id: string) => {
+    const target = businessList.find((b) => b.id === id);
+    setBusinessList((prev) => prev.filter((biz) => biz.id !== id));
+    setDeleteTarget(null);
+    if (target) {
+      showToast(`${target.name} telah dihapus.`, "danger");
+    }
+  }, [businessList, showToast]);
+
+  const handleCreateBusiness = (draft: StoreRegistrationDraft) => {
+    const newBusiness: Business = {
+      id: `store-${Date.now()}`,
+      name: draft.outletName.trim(),
+      type: draft.businessType.trim(),
+      location: `${draft.city.trim()} • ${draft.address.trim()}`,
+      status: draft.initialStoreMode === "activate" ? "active" : "maintenance",
+      category: draft.category as Business["category"],
+      todaySales: "Rp 0",
+      todayTransactions: 0,
+      growth: "Baru",
+    };
+    setBusinessList((previous) => [...previous, newBusiness]);
+
+    setActiveStoreTab("all");
+    setSearchQuery("");
   };
 
   const filteredBusinesses = businessList.filter((b) => {
@@ -450,22 +538,32 @@ export default function OwnerMenuPage() {
           {/* Business Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBusinesses.map((biz) => (
-              <BusinessCard key={biz.id} business={biz} />
+              <BusinessCard
+                key={biz.id}
+                business={biz}
+                onToggleStatus={handleToggleStatus}
+                onDeleteRequest={handleDeleteRequest}
+                onEditRequest={handleEditRequest}
+              />
             ))}
 
             {/* Add New Business Card */}
-            <div className="group flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-slate-300 hover:border-[#00C897] bg-white hover:bg-emerald-50/30 transition-all duration-300 min-h-[260px] text-center shadow-sm hover:shadow-md cursor-pointer">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-[#00C897] border border-emerald-100 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#00C897] group-hover:text-white transition-all duration-300 shadow-sm">
-                <Plus className="w-7 h-7" />
-              </div>
-              <h3 className="text-base font-bold text-[#0A2540] mb-1">Daftarkan Toko Baru</h3>
-              <p className="text-xs text-slate-500 max-w-xs mb-4">
-                Miliki cabang atau konsep bisnis baru? Tambahkan ke portal owner.
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-[#00C897] group-hover:underline">
-                Tambah Profil Bisnis <ChevronRight className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={() => setIsStoreRegistrationOpen(true)}
+              className="group flex min-h-[260px] cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:border-[#00C897] hover:bg-emerald-50/30 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#00C897]/50"
+            >
+              <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 text-[#00C897] shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-[#00C897] group-hover:text-white">
+                <Plus className="h-7 w-7" />
               </span>
-            </div>
+              <span className="mb-1 text-base font-bold text-[#0A2540]">Daftarkan Toko Baru</span>
+              <span className="mb-4 max-w-xs text-xs text-slate-500">
+                Miliki cabang atau konsep bisnis baru? Tambahkan ke portal owner.
+              </span>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-[#00C897] group-hover:underline">
+                Tambah Profil Bisnis <ChevronRight className="h-4 w-4" />
+              </span>
+            </button>
           </div>
         </div>
 
@@ -508,6 +606,30 @@ export default function OwnerMenuPage() {
         isActive={isTourActive}
         onFinish={() => setIsTourActive(false)}
       />
+
+      <NewStoreRegistrationModal
+        isOpen={isStoreRegistrationOpen}
+        existingBusinesses={businessList}
+        onClose={() => setIsStoreRegistrationOpen(false)}
+        onCreate={handleCreateBusiness}
+      />
+
+      {/* Delete Store Confirmation Modal */}
+      <DeleteStoreModal
+        target={deleteTarget}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+      />
+
+      {/* Edit Store Modal — hanya bisa dibuka saat status Maintenance */}
+      <EditStoreModal
+        target={editTarget}
+        onCancel={() => setEditTarget(null)}
+        onSave={handleEditSave}
+      />
+
+      {/* Toast Notification */}
+      <Toast toast={toast} onDismiss={dismissToast} />
     </div>
   );
 }
