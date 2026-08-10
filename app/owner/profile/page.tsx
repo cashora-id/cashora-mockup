@@ -139,7 +139,7 @@ export default function OwnerProfilePage() {
               { id: "personal", label: "Informasi Pribadi", icon: User },
               { id: "business", label: "Profil Bisnis & Outlet", icon: Building2 },
               { id: "security", label: "Keamanan & Sesi", icon: ShieldCheck },
-              { id: "billing", label: "Paket & Kuota", icon: Zap },
+              { id: "billing", label: "Langganan & Penggunaan", icon: Zap },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
