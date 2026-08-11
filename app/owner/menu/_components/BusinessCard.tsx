@@ -67,7 +67,9 @@ export function BusinessCard({ business, onToggleStatus, onDeleteRequest }: Busi
 
   return (
     <article className={`group relative flex h-full flex-col overflow-visible rounded-3xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-[#00C897] hover:shadow-xl ${!isActive ? "bg-slate-50/50" : ""}`}>
-      <div className={`h-1.5 w-full rounded-t-3xl ${isActive ? "bg-gradient-to-r from-[#00C897] to-emerald-400" : "bg-slate-300"}`} />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 overflow-hidden rounded-t-[23px]">
+        <div className={`h-1 w-full transition-all duration-300 group-hover:h-1.5 ${isActive ? "bg-gradient-to-r from-[#00C897] to-emerald-400" : "bg-slate-300 group-hover:bg-slate-400"}`} />
+      </div>
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-5 flex items-start justify-between">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/60 bg-slate-100 p-3 transition-transform group-hover:scale-105">
