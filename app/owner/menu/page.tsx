@@ -15,7 +15,8 @@ import {
   PieChart,
   Filter,
   Eye,
-  EyeOff
+  EyeOff,
+  Download
 } from "lucide-react";
 import { useCallback } from "react";
 import { Business, MetricTabType, Notification, PeriodType, StoreRegistrationDraft } from "./types";
@@ -27,8 +28,8 @@ import { BusinessCard } from "./_components/BusinessCard";
 import { HelpDrawer } from "./_components/HelpDrawer";
 import { DashboardTour } from "./_components/DashboardTour";
 import { DeleteStoreModal } from "./_components/DeleteStoreModal";
-import { EditStoreModal } from "./_components/EditStoreModal";
 import { Toast, ToastData } from "./_components/Toast";
+import { PaymentActivityPanel } from "./_components/PaymentActivityPanel";
 
 export default function OwnerMenuPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("today");
@@ -58,10 +59,35 @@ export default function OwnerMenuPage() {
 
   // Store Management States
   const [deleteTarget, setDeleteTarget] = useState<Business | null>(null);
-  const [editTarget, setEditTarget] = useState<Business | null>(null);
+
   const [toast, setToast] = useState<ToastData | null>(null);
 
   const activeData = dashboardData[selectedPeriod];
+
+  const handleExportCsv = () => {
+    const rows = [
+      ["Periode", activeData.periodLabel],
+      ["Total Penjualan", activeData.salesTotal],
+      ["Total Pengeluaran", activeData.expensesTotal],
+      ["Laba Bersih", activeData.netProfit],
+      ["Volume Transaksi", String(activeData.totalTransactions)],
+      [],
+      ["Outlet", "Kontribusi Penjualan", "Persentase"],
+      ...activeData.storeContributions.map((store) => [store.name, store.amount, `${store.percent}%`]),
+    ];
+    const csv = rows.map((row) => row.map((cell) => `\"${String(cell).replace(/\"/g, '\"\"')}\"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `laporan-owner-${selectedPeriod}-2026-08-09.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast("Laporan CSV berhasil diunduh.", "success");
+  };
+
+  const handlePdfPreview = () => {
+    showToast("Preview PDF belum tersedia pada mockup ini. Gunakan CSV untuk mengunduh ringkasan periode yang dipilih.", "warning");
+  };
 
   const toggleLineVisibility = (key: string) => {
     setVisibleLines((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -114,22 +140,6 @@ export default function OwnerMenuPage() {
     setDeleteTarget(target);
   }, [businessList]);
 
-  const handleEditRequest = useCallback((id: string) => {
-    const target = businessList.find((b) => b.id === id) ?? null;
-    // Strict guard: hanya boleh edit jika status maintenance
-    if (target && target.status !== "maintenance") return;
-    setEditTarget(target);
-  }, [businessList]);
-
-  const handleEditSave = useCallback((id: string, updates: { name: string; type: string; location: string; category: Business["category"] }) => {
-    setBusinessList((prev) =>
-      prev.map((biz) =>
-        biz.id === id ? { ...biz, ...updates } : biz
-      )
-    );
-    setEditTarget(null);
-    showToast(`${updates.name} berhasil diperbarui.`, "success");
-  }, [showToast]);
 
   const handleDeleteConfirm = useCallback((id: string) => {
     const target = businessList.find((b) => b.id === id);
@@ -314,8 +324,8 @@ export default function OwnerMenuPage() {
               </p>
             </div>
 
-            {/* Penjualan vs Pengeluaran Tabs */}
-            <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl w-fit">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl w-fit">
               <button
                 onClick={() => setActiveMetricTab("sales")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
@@ -338,6 +348,11 @@ export default function OwnerMenuPage() {
                 <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
                 Pengeluaran
               </button>
+              </div>
+              <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold">
+                <button onClick={handleExportCsv} className="inline-flex items-center gap-1.5 px-3 py-2 text-[#0A2540] hover:bg-emerald-50"><Download className="h-3.5 w-3.5 text-[#00A87E]" />CSV</button>
+                <button onClick={handlePdfPreview} className="border-l border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50">PDF</button>
+              </div>
             </div>
           </div>
 
@@ -484,8 +499,10 @@ export default function OwnerMenuPage() {
           </div>
         </div>
 
+        <PaymentActivityPanel />
+
         {/* ========== STORE SEARCH & BENTO GRID SECTION (TOUR TARGET 4) ========== */}
-        <div id="tour-stores" className="transition-all">
+        <div id="tour-stores" className="mt-10 transition-all">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-[#0A2540] tracking-tight">Daftar Toko & Outlet Anda</h2>
@@ -543,7 +560,6 @@ export default function OwnerMenuPage() {
                 business={biz}
                 onToggleStatus={handleToggleStatus}
                 onDeleteRequest={handleDeleteRequest}
-                onEditRequest={handleEditRequest}
               />
             ))}
 
@@ -621,12 +637,6 @@ export default function OwnerMenuPage() {
         onConfirm={handleDeleteConfirm}
       />
 
-      {/* Edit Store Modal — hanya bisa dibuka saat status Maintenance */}
-      <EditStoreModal
-        target={editTarget}
-        onCancel={() => setEditTarget(null)}
-        onSave={handleEditSave}
-      />
 
       {/* Toast Notification */}
       <Toast toast={toast} onDismiss={dismissToast} />
