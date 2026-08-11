@@ -137,8 +137,13 @@ export default function OwnerMenuPage() {
 
   const handleDeleteRequest = useCallback((id: string) => {
     const target = businessList.find((b) => b.id === id) ?? null;
+    // Strict guard: toko yang sedang beroperasi tidak boleh langsung dihapus.
+    if (target && target.status === "active") {
+      showToast("Toko aktif tidak dapat dihapus. Jeda operasional toko terlebih dahulu melalui menu aksi.", "warning");
+      return;
+    }
     setDeleteTarget(target);
-  }, [businessList]);
+  }, [businessList, showToast]);
 
 
   const handleDeleteConfirm = useCallback((id: string) => {

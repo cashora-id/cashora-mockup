@@ -89,9 +89,22 @@ export function BusinessCard({ business, onToggleStatus, onDeleteRequest }: Busi
                     {isActive ? "Jeda Operasional" : "Aktifkan Kembali"}
                   </button>
                   <div className="my-1 border-t border-slate-100" />
-                  <button onClick={() => invoke(() => onDeleteRequest(business.id))} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50" role="menuitem">
+                  <button
+                    type="button"
+                    onClick={() => { if (!isActive) invoke(() => onDeleteRequest(business.id)); }}
+                    disabled={isActive}
+                    aria-disabled={isActive}
+                    title={isActive ? "Toko aktif tidak dapat dihapus. Jeda operasional terlebih dahulu." : undefined}
+                    className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-xs font-semibold transition-colors ${isActive ? "cursor-not-allowed text-slate-300" : "text-rose-600 hover:bg-rose-50"}`}
+                    role="menuitem"
+                  >
                     <Trash2 className="h-4 w-4" />Hapus Toko
                   </button>
+                  {isActive && (
+                    <p className="px-4 pb-2 pt-1 text-[10px] font-medium leading-snug text-slate-400">
+                      Toko yang sedang beroperasi tidak dapat dihapus. Jeda toko terlebih dahulu.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
