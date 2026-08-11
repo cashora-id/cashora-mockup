@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, CircleHelp, User, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
+import { Bell, CircleHelp, User, LogOut, LayoutDashboard, ChevronDown, Users } from "lucide-react";
 import { Notification } from "../types";
 import { ownerName } from "../data";
 import { NotificationDropdown } from "./NotificationDropdown";
@@ -159,6 +159,15 @@ export function OwnerHeader({
                   >
                     <User className="w-4 h-4 text-[#00C897]" />
                     Pengaturan Profil Saya
+                  </Link>
+
+                  <Link
+                    href="/owner/staff"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-[#0A2540] transition-colors"
+                  >
+                    <Users className="w-4 h-4 text-[#00A87E]" />
+                    Manajemen Staff & Akses
                   </Link>
 
                   <Link
