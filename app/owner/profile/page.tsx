@@ -15,8 +15,7 @@ import {
   Mail,
   Phone,
   MapPin,
-  Camera,
-  Users
+  Camera
 } from "lucide-react";
 import { OwnerProfile } from "../menu/types";
 import { businesses, ownerName } from "../menu/data";
@@ -161,13 +160,6 @@ export default function OwnerProfilePage() {
             })}
           </div>
 
-          <div className="mb-6 flex flex-col justify-between gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 sm:flex-row sm:items-center">
-            <div>
-              <p className="text-xs font-extrabold text-[#0A2540]">Kontrol akses organisasi</p>
-              <p className="mt-0.5 text-[11px] text-slate-600">Kelola staff, peran, dan akses outlet dari satu tempat yang aman.</p>
-            </div>
-            <Link href="/owner/staff" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0A2540] px-3.5 py-2.5 text-xs font-extrabold text-[#00C897] transition-colors hover:bg-[#0d3154]"><Users className="h-4 w-4" />Kelola Staff & Akses</Link>
-          </div>
 
           {/* Active Tab Panel */}
           <div>

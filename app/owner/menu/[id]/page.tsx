@@ -20,11 +20,12 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
-import { businesses } from "../data";
-import { InventoryItem, OutletSettings, categoryLabel, inventorySeed, outletSettingsSeed } from "../../_lib/mock-owner-data";
+import { InventoryItem, OutletSettings, categoryLabel, inventorySeed, outletSettingsSeed, StaffMember, StaffRole } from "../../_lib/mock-owner-data";
 import { useOwnerToast } from "../../_components/OwnerToastProvider";
+import { useOwnerData } from "../../_components/OwnerDataProvider";
+import { DeleteStoreModal } from "../_components/DeleteStoreModal";
 
-type DetailTab = "overview" | "inventory" | "settings";
+type DetailTab = "overview" | "inventory" | "staff" | "settings";
 
 const inventoryTone: Record<InventoryItem["level"], { label: string; shell: string; icon: typeof CheckCircle2 }> = {
   safe: { label: "Aman", shell: "border-emerald-200 bg-emerald-50 text-emerald-700", icon: CheckCircle2 },
@@ -34,16 +35,20 @@ const inventoryTone: Record<InventoryItem["level"], { label: string; shell: stri
 
 export default function OutletDetailPage() {
   const params = useParams<{ id: string }>();
+  const { businesses, staff, setBusinessStatus, updateBusiness, deleteBusiness, inviteStaff, updateStaffRole, toggleStaffStatus } = useOwnerData();
   const outlet = businesses.find((business) => business.id === params.id);
   const { showToast } = useOwnerToast();
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [inventoryQuery, setInventoryQuery] = useState("");
   const [settings, setSettings] = useState<OutletSettings | null>(outlet ? outletSettingsSeed[outlet.id] : null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const items = useMemo(() => inventorySeed.filter((item) => item.outletId === outlet?.id && item.name.toLowerCase().includes(inventoryQuery.toLowerCase())), [inventoryQuery, outlet?.id]);
   const criticalCount = inventorySeed.filter((item) => item.outletId === outlet?.id && item.level === "critical").length;
   const lowCount = inventorySeed.filter((item) => item.outletId === outlet?.id && item.level === "low").length;
   const isEditable = outlet?.status === "maintenance";
+  const outletStaff = staff.filter((member) => member.outletIds.includes(outlet?.id ?? ""));
 
   if (!outlet || !settings) {
     return (
@@ -74,6 +79,31 @@ export default function OutletDetailPage() {
     showToast("success", `Pengaturan ${settings.businessName} berhasil disimpan.`);
   };
 
+  const changeOperationalStatus = () => {
+    if (!outlet) return;
+    const nextStatus = outlet.status === "active" ? "maintenance" : "active";
+    const message = nextStatus === "maintenance"
+      ? "Jeda operasional akan menghentikan transaksi sementara. Lanjutkan?"
+      : "Aktifkan kembali POS outlet ini dan izinkan transaksi?";
+    if (!window.confirm(message)) return;
+    setBusinessStatus(outlet.id, nextStatus);
+    showToast("success", nextStatus === "maintenance" ? `${outlet.name} dijeda dan masuk Maintenance.` : `${outlet.name} berhasil diaktifkan kembali.`);
+  };
+
+  const saveStoreIdentity = () => {
+    if (!outlet || !settings || !isEditable) return;
+    updateBusiness(outlet.id, { name: settings.businessName, location: settings.address, type: outlet.type, category: outlet.category });
+    saveSettings();
+  };
+
+  const confirmDelete = (id: string) => {
+    if (!outlet || outlet.status !== "maintenance") return;
+    deleteBusiness(id);
+    setDeleteOpen(false);
+    showToast("success", `${outlet.name} berhasil dihapus dari daftar outlet.`);
+    window.location.href = "/owner/menu";
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
@@ -92,8 +122,8 @@ export default function OutletDetailPage() {
               <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{outlet.name}</h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-300"><MapPin className="h-4 w-4 text-[#00C897]" />{outlet.location}</p>
             </div>
-            <button onClick={openSettings} aria-disabled={!isEditable} className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-colors ${isEditable ? "bg-[#00C897] text-[#0A2540] hover:bg-[#68e6c1]" : "cursor-not-allowed border border-white/15 bg-white/10 text-slate-400"}`}>
-              {isEditable ? <Settings2 className="h-4 w-4" /> : <LockKeyhole className="h-4 w-4" />}{isEditable ? "Pengaturan Toko" : "Pengaturan Terkunci"}
+            <button type="button" onClick={changeOperationalStatus} className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition-colors ${isEditable ? "border border-emerald-300/30 bg-white/10 text-[#63f0ca] hover:bg-white/15" : "bg-amber-400 text-[#0A2540] hover:bg-amber-300"}`}>
+              {isEditable ? <CheckCircle2 className="h-4 w-4" /> : <Wrench className="h-4 w-4" />}{isEditable ? "Aktifkan Kembali" : "Jeda Operasional"}
             </button>
           </div>
           {!isEditable && <p className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-slate-300"><LockKeyhole className="h-3.5 w-3.5 text-amber-300" />Untuk menjaga operasional tetap stabil, pengaturan hanya dapat diubah saat toko Maintenance.</p>}
@@ -103,7 +133,7 @@ export default function OutletDetailPage() {
       <main className="relative z-10 mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
         <div className="-mt-7 rounded-3xl border border-slate-200/80 bg-white p-3 shadow-xl sm:p-4">
           <div className="flex gap-2 overflow-x-auto">
-            {([ ["overview", "Ringkasan"], ["inventory", `Inventori${criticalCount ? ` (${criticalCount} kritis)` : ""}`], ["settings", "Pengaturan"] ] as const).map(([id, label]) => {
+            {([ ["overview", "Ringkasan"], ["inventory", `Inventori${criticalCount ? ` (${criticalCount} kritis)` : ""}`], ["staff", "Staff & Akses"], ["settings", "Pengaturan"] ] as const).map(([id, label]) => {
               const locked = id === "settings" && !isEditable;
               return <button key={id} onClick={() => id === "settings" ? openSettings() : setActiveTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-extrabold transition-all ${activeTab === id ? "bg-[#0A2540] text-[#00C897] shadow-md" : "bg-slate-100 text-slate-600 hover:bg-slate-200"} ${locked ? "opacity-65" : ""}`}>{locked && <LockKeyhole className="h-3.5 w-3.5" />}{label}</button>;
             })}
@@ -129,10 +159,24 @@ export default function OutletDetailPage() {
           <section className="mt-7 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#00A87E]">Monitoring inventori</p><h2 className="mt-1 text-xl font-extrabold text-[#0A2540]">Stok {outlet.name}</h2><p className="mt-1 max-w-2xl text-sm text-slate-500">Prioritaskan item kritis lebih dahulu. Angka di bawah adalah data mock untuk desain operasional owner.</p></div><div className="relative w-full md:w-72"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input value={inventoryQuery} onChange={(event) => setInventoryQuery(event.target.value)} placeholder="Cari produk atau SKU..." className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-3 text-xs outline-none transition focus:border-[#00C897] focus:ring-2 focus:ring-[#00C897]/20" /></div></div><div className="mt-6 grid gap-3 sm:grid-cols-3"><InventorySummary label="Stok kritis" count={criticalCount} tone="rose" /><InventorySummary label="Stok menipis" count={lowCount} tone="amber" /><InventorySummary label="Total item terpantau" count={inventorySeed.filter((item) => item.outletId === outlet.id).length} tone="emerald" /></div><div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200"><table className="min-w-[720px] w-full text-left text-xs"><thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><tr><th className="px-4 py-3 font-bold">Produk</th><th className="px-4 py-3 font-bold">Kategori</th><th className="px-4 py-3 font-bold">Stok saat ini</th><th className="px-4 py-3 font-bold">Batas minimum</th><th className="px-4 py-3 font-bold">Status</th><th className="px-4 py-3 font-bold">Diperbarui</th></tr></thead><tbody className="divide-y divide-slate-100">{items.map((item) => { const tone = inventoryTone[item.level]; const StatusIcon = tone.icon; return <tr key={item.id} className="bg-white"><td className="px-4 py-4"><p className="font-extrabold text-[#0A2540]">{item.name}</p><p className="mt-0.5 text-[10px] text-slate-400">{item.sku}</p></td><td className="px-4 py-4 text-slate-600">{item.category}</td><td className="px-4 py-4 font-extrabold text-[#0A2540]">{item.quantity} {item.unit}</td><td className="px-4 py-4 text-slate-600">{item.minimumStock} {item.unit}</td><td className="px-4 py-4"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-extrabold ${tone.shell}`}><StatusIcon className="h-3.5 w-3.5" />{tone.label}</span></td><td className="px-4 py-4 text-slate-500">{item.updatedAt}</td></tr>; })}{items.length === 0 && <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-500">Produk tidak ditemukan.</td></tr>}</tbody></table></div></section>
         )}
 
+        {activeTab === "staff" && (
+          <section className="mt-7 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#00A87E]">Akses outlet</p><h2 className="mt-1 text-xl font-extrabold text-[#0A2540]">Staff & Akses</h2><p className="mt-1 text-sm text-slate-500">Kelola anggota yang dapat mengakses {outlet.name}.</p></div>
+              <button type="button" onClick={() => setInviteOpen(true)} className="rounded-xl bg-[#0A2540] px-4 py-2.5 text-xs font-extrabold text-[#00C897]">Undang Staff</button>
+            </div>
+            <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200"><table className="min-w-[720px] w-full text-left text-xs"><thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><tr><th className="px-4 py-3">Anggota</th><th className="px-4 py-3">Peran</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Aksi</th></tr></thead><tbody className="divide-y divide-slate-100">{outletStaff.map((member) => <tr key={member.id}><td className="px-4 py-4"><p className="font-extrabold text-[#0A2540]">{member.name}</p><p className="mt-0.5 text-[10px] text-slate-400">{member.phone}</p></td><td className="px-4 py-4 font-bold text-slate-700">{member.role === "owner" ? "Owner Utama" : member.role === "manager" ? "Manager Outlet" : "Kasir"}</td><td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${member.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>{member.status === "active" ? "Aktif" : member.status === "invited" ? "Diundang" : "Nonaktif"}</span></td><td className="px-4 py-4"><button type="button" disabled={member.role === "owner"} onClick={() => { if (member.role !== "owner") { toggleStaffStatus(member.id); showToast("success", `Status akses ${member.name} diperbarui.`); } }} className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-extrabold text-[#0A2540] disabled:cursor-not-allowed disabled:opacity-40">{member.status === "inactive" ? "Aktifkan" : "Nonaktifkan"}</button></td></tr>)}</tbody></table></div>
+          </section>
+        )}
+
+        {activeTab === "settings" && !isEditable && (<section className="mt-7 max-w-3xl rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm"><div className="flex items-start gap-3"><LockKeyhole className="h-5 w-5 text-slate-400" /><div><h2 className="text-base font-extrabold text-[#0A2540]">Pengaturan Terkunci</h2><p className="mt-1 text-xs leading-relaxed text-slate-500">Jeda operasional outlet terlebih dahulu untuk mengubah identitas toko, konfigurasi, atau menghapus outlet.</p></div></div></section>)}
+
         {activeTab === "settings" && isEditable && (
-          <section className="mt-7 max-w-3xl rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00A87E]"><Settings2 className="h-5 w-5" /></div><div><h2 className="text-lg font-extrabold text-[#0A2540]">Pengaturan toko</h2><p className="mt-1 text-xs leading-relaxed text-slate-500">Toko sedang Maintenance. Perubahan dapat disiapkan dengan aman sebelum operasional diaktifkan kembali.</p></div></div><div className="mt-7 grid gap-5 sm:grid-cols-2"><SettingsField label="Nama toko" value={settings.businessName} onChange={(value) => setSettings({ ...settings, businessName: value })} /><SettingsField label="Alamat" value={settings.address} onChange={(value) => setSettings({ ...settings, address: value })} /><SettingsField label="Jam operasional" value={settings.openingHours} onChange={(value) => setSettings({ ...settings, openingHours: value })} /><label className="block"><span className="mb-1.5 block text-xs font-bold text-slate-600">Zona waktu</span><select value={settings.timezone} onChange={(event) => setSettings({ ...settings, timezone: event.target.value as OutletSettings["timezone"] })} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#00C897] focus:ring-2 focus:ring-[#00C897]/20"><option>WIB</option><option>WITA</option><option>WIT</option></select></label></div><div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-extrabold text-[#0A2540]">Pajak & service charge</p><div className="mt-4 grid gap-4 sm:grid-cols-2"><ToggleSetting label="Pajak" enabled={settings.taxEnabled} onToggle={() => setSettings({ ...settings, taxEnabled: !settings.taxEnabled })} /><ToggleSetting label="Service charge" enabled={settings.serviceChargeEnabled} onToggle={() => setSettings({ ...settings, serviceChargeEnabled: !settings.serviceChargeEnabled })} /></div></div><div className="mt-7 flex justify-end gap-3"><button onClick={() => setActiveTab("overview")} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-extrabold text-slate-600 hover:bg-slate-50">Batal</button><button onClick={saveSettings} className="rounded-xl bg-[#0A2540] px-4 py-2.5 text-xs font-extrabold text-[#00C897] hover:bg-[#0d3154]">Simpan Pengaturan</button></div></section>
+          <section className="mt-7 max-w-3xl rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8"><div className="flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-[#00A87E]"><Settings2 className="h-5 w-5" /></div><div><h2 className="text-lg font-extrabold text-[#0A2540]">Pengaturan toko</h2><p className="mt-1 text-xs leading-relaxed text-slate-500">Toko sedang Maintenance. Perubahan dapat disiapkan dengan aman sebelum operasional diaktifkan kembali.</p></div></div><div className="mt-7 grid gap-5 sm:grid-cols-2"><SettingsField label="Nama toko" value={settings.businessName} onChange={(value) => setSettings({ ...settings, businessName: value })} /><SettingsField label="Alamat" value={settings.address} onChange={(value) => setSettings({ ...settings, address: value })} /><SettingsField label="Jam operasional" value={settings.openingHours} onChange={(value) => setSettings({ ...settings, openingHours: value })} /><label className="block"><span className="mb-1.5 block text-xs font-bold text-slate-600">Zona waktu</span><select value={settings.timezone} onChange={(event) => setSettings({ ...settings, timezone: event.target.value as OutletSettings["timezone"] })} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#00C897] focus:ring-2 focus:ring-[#00C897]/20"><option>WIB</option><option>WITA</option><option>WIT</option></select></label></div><div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-extrabold text-[#0A2540]">Pajak & service charge</p><div className="mt-4 grid gap-4 sm:grid-cols-2"><ToggleSetting label="Pajak" enabled={settings.taxEnabled} onToggle={() => setSettings({ ...settings, taxEnabled: !settings.taxEnabled })} /><ToggleSetting label="Service charge" enabled={settings.serviceChargeEnabled} onToggle={() => setSettings({ ...settings, serviceChargeEnabled: !settings.serviceChargeEnabled })} /></div></div><div className="mt-7 flex justify-end gap-3"><button onClick={() => setActiveTab("overview")} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-extrabold text-slate-600 hover:bg-slate-50">Batal</button><button onClick={saveStoreIdentity} className="rounded-xl bg-[#0A2540] px-4 py-2.5 text-xs font-extrabold text-[#00C897] hover:bg-[#0d3154]">Simpan Pengaturan</button><button type="button" onClick={() => setDeleteOpen(true)} className="rounded-xl border border-rose-200 px-4 py-2.5 text-xs font-extrabold text-rose-700 hover:bg-rose-50">Hapus Toko</button></div></section>
         )}
       </main>
+      {deleteOpen && <DeleteStoreModal target={outlet} onCancel={() => setDeleteOpen(false)} onConfirm={confirmDelete} />}
+      {inviteOpen && <OutletInviteModal outletId={outlet.id} onClose={() => setInviteOpen(false)} onInvite={(input) => { const member = inviteStaff(input); setInviteOpen(false); showToast("success", `Undangan untuk ${member.name} berhasil dicatat.`); }} />}
     </div>
   );
 }
@@ -141,3 +185,14 @@ function ReceiptIcon({ className }: { className?: string }) { return <Box classN
 function InventorySummary({ label, count, tone }: { label: string; count: number; tone: "rose" | "amber" | "emerald" }) { const colors = { rose: "border-rose-100 bg-rose-50 text-rose-700", amber: "border-amber-100 bg-amber-50 text-amber-700", emerald: "border-emerald-100 bg-emerald-50 text-emerald-700" }; return <div className={`rounded-2xl border p-4 ${colors[tone]}`}><p className="text-[11px] font-bold">{label}</p><p className="mt-1 text-2xl font-black">{count}</p></div>; }
 function SettingsField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="block"><span className="mb-1.5 block text-xs font-bold text-slate-600">{label}</span><input value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#00C897] focus:ring-2 focus:ring-[#00C897]/20" /></label>; }
 function ToggleSetting({ label, enabled, onToggle }: { label: string; enabled: boolean; onToggle: () => void }) { return <button type="button" onClick={onToggle} className="flex items-center justify-between rounded-xl bg-white p-3 text-left text-xs font-bold text-slate-700 shadow-sm"><span>{label}</span><span className={`h-5 w-9 rounded-full p-0.5 transition-colors ${enabled ? "bg-[#00C897]" : "bg-slate-200"}`}><span className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-4" : "translate-x-0"}`} /></span></button>; }
+
+function OutletInviteModal({ outletId, onClose, onInvite }: { outletId: string; onClose: () => void; onInvite: (input: { name: string; phone: string; role: StaffRole; outletIds: string[] }) => void }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [role, setRole] = useState<StaffRole>("cashier");
+  const submit = () => {
+    if (name.trim().length < 3 || phone.replace(/\D/g, "").length < 9) return;
+    onInvite({ name: name.trim(), phone: phone.trim(), role, outletIds: [outletId] });
+  };
+  return <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4"><button onClick={onClose} aria-label="Tutup" className="absolute inset-0 bg-slate-900/55 backdrop-blur-sm" /><section role="dialog" aria-modal="true" aria-labelledby="outlet-invite-title" className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><h2 id="outlet-invite-title" className="text-lg font-extrabold text-[#0A2540]">Undang staff outlet</h2><p className="mt-1 text-xs text-slate-500">Undangan mock akan dikaitkan dengan outlet ini.</p><div className="mt-5 space-y-4"><SettingsField label="Nama lengkap" value={name} onChange={setName} /><SettingsField label="Nomor WhatsApp" value={phone} onChange={setPhone} /><label className="block"><span className="mb-1.5 block text-xs font-bold text-slate-600">Peran</span><select value={role} onChange={(event) => setRole(event.target.value as StaffRole)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="manager">Manager Outlet</option><option value="cashier">Kasir</option></select></label></div><div className="mt-6 flex justify-end gap-2"><button onClick={onClose} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-extrabold text-slate-600">Batal</button><button onClick={submit} className="rounded-xl bg-[#0A2540] px-4 py-2.5 text-xs font-extrabold text-[#00C897]">Buat Undangan</button></div></section></div>;
+}

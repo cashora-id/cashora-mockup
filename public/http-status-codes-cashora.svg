@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Cashora POS HTTP Status Codes</title>
+  <desc id="desc">A Cashora navy and mint reference illustration for HTTP response statuses used by a POS application.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071B30"/>
+      <stop offset="1" stop-color="#0D3154"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00C897"/>
+      <stop offset="1" stop-color="#68E6C1"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#03111f" flood-opacity=".28"/>
+    </filter>
+    <style>
+      .font { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .title { fill: #FFFFFF; font-size: 42px; font-weight: 800; letter-spacing: -.8px; }
+      .subtitle { fill: #B9C8D7; font-size: 17px; font-weight: 500; }
+      .section { fill: #00C897; font-size: 13px; font-weight: 800; letter-spacing: 2px; }
+      .code { fill: #0A2540; font-size: 32px; font-weight: 900; }
+      .name { fill: #0A2540; font-size: 17px; font-weight: 800; }
+      .copy { fill: #5D7185; font-size: 13px; font-weight: 600; }
+      .tag { fill: #6B8194; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1080" fill="url(#bg)"/>
+  <circle cx="1450" cy="-30" r="280" fill="#00C897" opacity=".08"/>
+  <circle cx="80" cy="1050" r="260" fill="#3B82F6" opacity=".08"/>
+
+  <g class="font">
+    <text x="88" y="86" class="section">CASHORA POS • ERROR REFERENCE</text>
+    <text x="88" y="145" class="title">HTTP Status Code States</text>
+    <text x="88" y="181" class="subtitle">Plain-language response states for owner, outlet, payment, and POS workflows.</text>
+    <rect x="88" y="215" width="1424" height="2" fill="#FFFFFF" opacity=".12"/>
+
+    <!-- Card template: x 88, 420, 752, 1084; width 304; height 206 -->
+    <!-- 400 -->
+    <g filter="url(#shadow)">
+      <rect x="88" y="258" width="304" height="206" rx="24" fill="#FFFFFF"/>
+      <rect x="88" y="258" width="304" height="6" rx="3" fill="#F59E0B"/>
+      <circle cx="130" cy="307" r="22" fill="#FFF7E6"/><path d="M130 294v16M130 317h.01" stroke="#D97706" stroke-width="3" stroke-linecap="round"/>
+      <text x="166" y="319" class="code">400</text><text x="259" y="307" class="tag">CLIENT</text>
+      <text x="112" y="365" class="name">Bad Request</text><text x="112" y="393" class="copy">Permintaan tidak valid</text><text x="112" y="423" class="copy">Periksa data dan coba lagi.</text>
+    </g>
+    <!-- 401 -->
+    <g filter="url(#shadow)">
+      <rect x="420" y="258" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="420" y="258" width="304" height="6" rx="3" fill="#3B82F6"/>
+      <circle cx="462" cy="307" r="22" fill="#EFF6FF"/><circle cx="462" cy="302" r="7" fill="none" stroke="#2563EB" stroke-width="2.5"/><path d="M449 320c3-8 23-8 26 0M462 312v8" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="498" y="319" class="code">401</text><text x="591" y="307" class="tag">AUTH</text>
+      <text x="444" y="365" class="name">Unauthorized</text><text x="444" y="393" class="copy">Silakan login terlebih dahulu</text><text x="444" y="423" class="copy">Sesi login tidak ditemukan.</text>
+    </g>
+    <!-- 403 -->
+    <g filter="url(#shadow)">
+      <rect x="752" y="258" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="752" y="258" width="304" height="6" rx="3" fill="#8B5CF6"/>
+      <circle cx="794" cy="307" r="22" fill="#F5F3FF"/><rect x="783" y="304" width="22" height="16" rx="3" fill="none" stroke="#7C3AED" stroke-width="2.5"/><path d="M788 304v-5a6 6 0 0 1 12 0v5" fill="none" stroke="#7C3AED" stroke-width="2.5"/>
+      <text x="830" y="319" class="code">403</text><text x="923" y="307" class="tag">ACCESS</text>
+      <text x="776" y="365" class="name">Forbidden</text><text x="776" y="393" class="copy">Akses ditolak</text><text x="776" y="423" class="copy">Akun tidak memiliki izin.</text>
+    </g>
+    <!-- 404 -->
+    <g filter="url(#shadow)">
+      <rect x="1084" y="258" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="1084" y="258" width="304" height="6" rx="3" fill="#64748B"/>
+      <circle cx="1126" cy="307" r="22" fill="#F1F5F9"/><path d="M1115 298h14l6 6v13h-20zM1129 298v7h6" fill="none" stroke="#475569" stroke-width="2.5" stroke-linejoin="round"/><path d="M1119 313h10" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="1162" y="319" class="code">404</text><text x="1255" y="307" class="tag">ROUTE</text>
+      <text x="1108" y="365" class="name">Not Found</text><text x="1108" y="393" class="copy">Halaman tidak ditemukan</text><text x="1108" y="423" class="copy">Periksa URL atau kembali.</text>
+    </g>
+
+    <!-- 408 -->
+    <g filter="url(#shadow)">
+      <rect x="88" y="506" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="88" y="506" width="304" height="6" rx="3" fill="#F59E0B"/>
+      <circle cx="130" cy="555" r="22" fill="#FFF7E6"/><circle cx="130" cy="555" r="11" fill="none" stroke="#D97706" stroke-width="2.5"/><path d="M130 548v8l5 3" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="166" y="567" class="code">408</text><text x="259" y="555" class="tag">TIMEOUT</text>
+      <text x="112" y="613" class="name">Request Timeout</text><text x="112" y="641" class="copy">Waktu permintaan habis</text><text x="112" y="671" class="copy">Coba ulangi permintaan.</text>
+    </g>
+    <!-- 429 -->
+    <g filter="url(#shadow)">
+      <rect x="420" y="506" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="420" y="506" width="304" height="6" rx="3" fill="#EF4444"/>
+      <circle cx="462" cy="555" r="22" fill="#FFF1F2"/><path d="M450 555h24M462 543v24" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"/><circle cx="462" cy="555" r="12" fill="none" stroke="#DC2626" stroke-width="2.5"/>
+      <text x="498" y="567" class="code">429</text><text x="591" y="555" class="tag">LIMIT</text>
+      <text x="444" y="613" class="name">Too Many Requests</text><text x="444" y="641" class="copy">Terlalu banyak percobaan</text><text x="444" y="671" class="copy">Tunggu sebelum mencoba lagi.</text>
+    </g>
+    <!-- 500 -->
+    <g filter="url(#shadow)">
+      <rect x="752" y="506" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="752" y="506" width="304" height="6" rx="3" fill="#EF4444"/>
+      <circle cx="794" cy="555" r="22" fill="#FFF1F2"/><rect x="782" y="548" width="24" height="17" rx="3" fill="none" stroke="#DC2626" stroke-width="2.5"/><path d="M788 548v-6h12v6M788 570h12" fill="none" stroke="#DC2626" stroke-width="2.5"/><path d="M794 553v7" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="830" y="567" class="code">500</text><text x="923" y="555" class="tag">SERVER</text>
+      <text x="776" y="613" class="name">Internal Server Error</text><text x="776" y="641" class="copy">Terjadi kesalahan pada server</text><text x="776" y="671" class="copy">Tim kami sedang memeriksa.</text>
+    </g>
+    <!-- 502 -->
+    <g filter="url(#shadow)">
+      <rect x="1084" y="506" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="1084" y="506" width="304" height="6" rx="3" fill="#F97316"/>
+      <circle cx="1126" cy="555" r="22" fill="#FFF7ED"/><rect x="1112" y="547" width="12" height="14" rx="2" fill="none" stroke="#EA580C" stroke-width="2.5"/><rect x="1128" y="547" width="12" height="14" rx="2" fill="none" stroke="#EA580C" stroke-width="2.5"/><path d="M1124 554h4M1126 551l3 3-3 3" fill="none" stroke="#EA580C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="1162" y="567" class="code">502</text><text x="1255" y="555" class="tag">GATEWAY</text>
+      <text x="1108" y="613" class="name">Bad Gateway</text><text x="1108" y="641" class="copy">Gateway bermasalah</text><text x="1108" y="671" class="copy">Provider belum merespons normal.</text>
+    </g>
+
+    <!-- 503 -->
+    <g filter="url(#shadow)">
+      <rect x="254" y="754" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="254" y="754" width="304" height="6" rx="3" fill="#64748B"/>
+      <circle cx="296" cy="803" r="22" fill="#F1F5F9"/><path d="M286 806a11 11 0 0 1 20 0M282 812h28M296 794v6" fill="none" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="332" y="815" class="code">503</text><text x="425" y="803" class="tag">SERVICE</text>
+      <text x="278" y="861" class="name">Service Unavailable</text><text x="278" y="889" class="copy">Layanan sedang tidak tersedia</text><text x="278" y="919" class="copy">Sistem dalam maintenance.</text>
+    </g>
+    <!-- 504 -->
+    <g filter="url(#shadow)">
+      <rect x="922" y="754" width="304" height="206" rx="24" fill="#FFFFFF"/><rect x="922" y="754" width="304" height="6" rx="3" fill="#F59E0B"/>
+      <circle cx="964" cy="803" r="22" fill="#FFF7E6"/><circle cx="964" cy="803" r="11" fill="none" stroke="#D97706" stroke-width="2.5"/><path d="M964 796v8l5 3M949 803h-5M984 803h-5" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="1000" y="815" class="code">504</text><text x="1093" y="803" class="tag">GATEWAY</text>
+      <text x="946" y="861" class="name">Gateway Timeout</text><text x="946" y="889" class="copy">Server terlalu lama merespons</text><text x="946" y="919" class="copy">Coba lagi beberapa saat.</text>
+    </g>
+
+    <rect x="88" y="1010" width="1424" height="2" fill="#FFFFFF" opacity=".12"/>
+    <text x="88" y="1043" class="subtitle">Cashora POS • Provider-neutral UI reference • Backend remains the source of truth for production status mapping</text>
+    <rect x="1384" y="1026" width="128" height="10" rx="5" fill="url(#mint)"/>
+  </g>
+</svg>

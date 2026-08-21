@@ -93,7 +93,7 @@ export const initialNotifications: Notification[] = [
   }
 ];
 
-export const dashboardData: Record<PeriodType, PeriodData> = {
+const baseDashboardData: Record<"today" | "yesterday" | "7d" | "30d", PeriodData> = {
   today: {
     periodLabel: "Hari Ini (9 Agustus 2026)",
     salesTotal: "Rp 11.060.000",
@@ -486,4 +486,30 @@ export const dashboardData: Record<PeriodType, PeriodData> = {
       { category: "Listrik, Air & Wi-Fi", amount: "Rp 7.872.000", percent: 8, icon: Receipt }
     ]
   }
+};
+
+const makeBusinessPeriod = (periodLabel: string, source: PeriodData, multiplier: number): PeriodData => ({
+  ...source,
+  periodLabel,
+  salesTotal: source.salesTotal,
+  expensesTotal: source.expensesTotal,
+  netProfit: source.netProfit,
+  chartPoints: source.chartPoints.map((point) => ({
+    ...point,
+    label: point.label,
+    totalSales: Math.round(point.totalSales * multiplier),
+    totalSalesFormatted: point.totalSalesFormatted,
+    totalExpenses: Math.round(point.totalExpenses * multiplier),
+    totalExpensesFormatted: point.totalExpensesFormatted,
+  })),
+});
+
+export const dashboardData: Record<PeriodType, PeriodData> = {
+  ...baseDashboardData,
+  q1: makeBusinessPeriod("Q1 2026 (Januari – Maret)", baseDashboardData["30d"], 2.9),
+  q2: makeBusinessPeriod("Q2 2026 (April – Juni)", baseDashboardData["30d"], 3.2),
+  q3: makeBusinessPeriod("Q3 2026 (Juli – September)", baseDashboardData["30d"], 3.5),
+  q4: makeBusinessPeriod("Q4 2026 (Oktober – Desember)", baseDashboardData["30d"], 3.8),
+  h1: makeBusinessPeriod("Semester 1 2026 (Januari – Juni)", baseDashboardData["30d"], 6.1),
+  h2: makeBusinessPeriod("Semester 2 2026 (Juli – Desember)", baseDashboardData["30d"], 6.8),
 };

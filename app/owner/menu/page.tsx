@@ -20,18 +20,19 @@ import {
 } from "lucide-react";
 import { useCallback } from "react";
 import { Business, MetricTabType, Notification, PeriodType, StoreRegistrationDraft } from "./types";
-import { STORE_SERIES, businesses, dashboardData, initialNotifications } from "./data";
+import { STORE_SERIES, dashboardData, initialNotifications } from "./data";
 import { OwnerHeader } from "./_components/OwnerHeader";
 import { NewStoreRegistrationModal } from "./_components/NewStoreRegistrationModal";
 import { MultiLineSvgChart } from "./_components/MultiLineSvgChart";
 import { BusinessCard } from "./_components/BusinessCard";
 import { HelpDrawer } from "./_components/HelpDrawer";
 import { DashboardTour } from "./_components/DashboardTour";
-import { DeleteStoreModal } from "./_components/DeleteStoreModal";
+
 import { Toast, ToastData } from "./_components/Toast";
-import { PaymentActivityPanel } from "./_components/PaymentActivityPanel";
+import { useOwnerData } from "../_components/OwnerDataProvider";
 
 export default function OwnerMenuPage() {
+  const { businesses: businessList, createBusiness } = useOwnerData();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("today");
   const [activeMetricTab, setActiveMetricTab] = useState<MetricTabType>("sales");
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
@@ -45,7 +46,6 @@ export default function OwnerMenuPage() {
   });
 
   // Business List States
-  const [businessList, setBusinessList] = useState<Business[]>(businesses);
   const [searchQuery, setSearchQuery] = useState("");
   const [isStoreRegistrationOpen, setIsStoreRegistrationOpen] = useState(false);
   const [activeStoreTab, setActiveStoreTab] = useState<"all" | "active" | "maintenance">("all");
@@ -58,7 +58,6 @@ export default function OwnerMenuPage() {
   const [isTourActive, setIsTourActive] = useState(false);
 
   // Store Management States
-  const [deleteTarget, setDeleteTarget] = useState<Business | null>(null);
 
   const [toast, setToast] = useState<ToastData | null>(null);
 
@@ -115,45 +114,6 @@ export default function OwnerMenuPage() {
     setToast((prev) => (prev?.id === id ? null : prev));
   }, []);
 
-  const handleToggleStatus = useCallback((id: string) => {
-    setBusinessList((prev) =>
-      prev.map((biz) =>
-        biz.id === id
-          ? { ...biz, status: biz.status === "active" ? "maintenance" : "active" }
-          : biz
-      )
-    );
-    const target = businessList.find((b) => b.id === id);
-    if (target) {
-      const isNowMaintenance = target.status === "active";
-      showToast(
-        isNowMaintenance
-          ? `${target.name} berhasil dijeda (maintenance).`
-          : `${target.name} berhasil diaktifkan kembali.`,
-        isNowMaintenance ? "warning" : "success"
-      );
-    }
-  }, [businessList, showToast]);
-
-  const handleDeleteRequest = useCallback((id: string) => {
-    const target = businessList.find((b) => b.id === id) ?? null;
-    // Strict guard: toko yang sedang beroperasi tidak boleh langsung dihapus.
-    if (target && target.status === "active") {
-      showToast("Toko aktif tidak dapat dihapus. Jeda operasional toko terlebih dahulu melalui menu aksi.", "warning");
-      return;
-    }
-    setDeleteTarget(target);
-  }, [businessList, showToast]);
-
-
-  const handleDeleteConfirm = useCallback((id: string) => {
-    const target = businessList.find((b) => b.id === id);
-    setBusinessList((prev) => prev.filter((biz) => biz.id !== id));
-    setDeleteTarget(null);
-    if (target) {
-      showToast(`${target.name} telah dihapus.`, "danger");
-    }
-  }, [businessList, showToast]);
 
   const handleCreateBusiness = (draft: StoreRegistrationDraft) => {
     const newBusiness: Business = {
@@ -167,7 +127,7 @@ export default function OwnerMenuPage() {
       todayTransactions: 0,
       growth: "Baru",
     };
-    setBusinessList((previous) => [...previous, newBusiness]);
+    createBusiness(newBusiness);
 
     setActiveStoreTab("all");
     setSearchQuery("");
@@ -220,8 +180,14 @@ export default function OwnerMenuPage() {
               {[
                 { id: "today", label: "Hari Ini" },
                 { id: "yesterday", label: "Kemarin" },
-                { id: "7d", label: "7 Hari Terakhir" },
-                { id: "30d", label: "30 Hari Terakhir" },
+                { id: "7d", label: "7 Hari" },
+                { id: "30d", label: "30 Hari" },
+                { id: "q1", label: "Q1" },
+                { id: "q2", label: "Q2" },
+                { id: "q3", label: "Q3" },
+                { id: "q4", label: "Q4" },
+                { id: "h1", label: "S1" },
+                { id: "h2", label: "S2" },
               ].map((period) => (
                 <button
                   key={period.id}
@@ -504,8 +470,6 @@ export default function OwnerMenuPage() {
           </div>
         </div>
 
-        <PaymentActivityPanel />
-
         {/* ========== STORE SEARCH & BENTO GRID SECTION (TOUR TARGET 4) ========== */}
         <div id="tour-stores" className="mt-10 transition-all">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -563,8 +527,6 @@ export default function OwnerMenuPage() {
               <BusinessCard
                 key={biz.id}
                 business={biz}
-                onToggleStatus={handleToggleStatus}
-                onDeleteRequest={handleDeleteRequest}
               />
             ))}
 
@@ -635,12 +597,6 @@ export default function OwnerMenuPage() {
         onCreate={handleCreateBusiness}
       />
 
-      {/* Delete Store Confirmation Modal */}
-      <DeleteStoreModal
-        target={deleteTarget}
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={handleDeleteConfirm}
-      />
 
 
       {/* Toast Notification */}

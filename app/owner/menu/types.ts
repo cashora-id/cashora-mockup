@@ -1,6 +1,6 @@
 import { ComponentType } from "react";
 
-export type PeriodType = "today" | "yesterday" | "7d" | "30d";
+export type PeriodType = "today" | "yesterday" | "7d" | "30d" | "q1" | "q2" | "q3" | "q4" | "h1" | "h2";
 export type MetricTabType = "sales" | "expenses";
 export type StoreRegistrationStep = 1 | 2 | 3 | 4 | 5;
 export type StoreCategory =
