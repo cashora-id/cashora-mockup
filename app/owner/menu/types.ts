@@ -141,6 +141,7 @@ export interface Business {
   type: string;
   location: string;
   status: "active" | "maintenance";
+  onlineStatus: "online" | "offline";
   category: StoreCategory;
   todaySales: string;
   todayTransactions: number;
@@ -197,7 +198,8 @@ export interface FAQItem {
   id: string;
   question: string;
   answer: string;
-  category: "umum" | "laporan" | "pos" | "pembayaran";
+  category: "umum" | "laporan" | "pos" | "pembayaran" | "outlet" | "staff" | "inventori" | "akun" | "keamanan" | "langganan" | "teknis";
+  keywords?: string[];
 }
 
 export interface TourStep {

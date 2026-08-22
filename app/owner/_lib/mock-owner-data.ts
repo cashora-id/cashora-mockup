@@ -27,16 +27,35 @@ export interface OutletSettings {
 }
 
 export type StaffRole = "owner" | "manager" | "cashier";
+export type EmploymentType = "permanent" | "contract" | "part_time" | "intern";
+
+export interface StaffVerification {
+  workIdentityChecked: boolean;
+  agreementConfirmed: boolean;
+  accessBriefingCompleted: boolean;
+}
 
 export interface StaffMember {
   id: string;
   name: string;
   phone: string;
+  email?: string;
+  employeeCode?: string;
   role: StaffRole;
+  employmentType?: EmploymentType;
+  startDate?: string;
+  address?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelation?: string;
+  verification?: StaffVerification;
+  notes?: string;
   outletIds: string[];
   status: "active" | "inactive" | "invited";
   lastActive: string;
 }
+
+export type StaffRegistrationInput = Omit<StaffMember, "id" | "status" | "lastActive">;
 
 export const inventorySeed: InventoryItem[] = [
   { id: "inv-1", outletId: "1", name: "Beras premium", sku: "BB-001", category: "Bahan baku", quantity: 8, unit: "kg", minimumStock: 80, level: "critical", updatedAt: "Hari ini, 08.10" },
@@ -86,6 +105,6 @@ export const categoryLabel = (category: StoreCategory) => {
 
 export const formatRupiah = (value: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
 
-export const makeNewStaff = (input: Omit<StaffMember, "id" | "status" | "lastActive">): StaffMember => ({ ...input, id: `staff-${Date.now()}`, status: "invited", lastActive: "Undangan belum diterima" });
+export const makeNewStaff = (input: StaffRegistrationInput): StaffMember => ({ ...input, id: `staff-${Date.now()}`, status: "inactive", lastActive: "Belum aktif" });
 
 export const getOutlet = (businesses: Business[], outletId: string) => businesses.find((business) => business.id === outletId);

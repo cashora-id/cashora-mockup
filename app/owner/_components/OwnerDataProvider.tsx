@@ -3,10 +3,10 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { businesses } from "../menu/data";
 import { Business } from "../menu/types";
-import { StaffMember, StaffRole, makeNewStaff, staffSeed } from "../_lib/mock-owner-data";
+import { StaffMember, StaffRole, StaffRegistrationInput, makeNewStaff, staffSeed } from "../_lib/mock-owner-data";
 
 type BusinessUpdates = Pick<Business, "name" | "type" | "location" | "category">;
-type StaffInvite = Omit<StaffMember, "id" | "status" | "lastActive">;
+type StaffInvite = StaffRegistrationInput;
 
 type OwnerDataContextValue = {
   businesses: Business[];
@@ -15,9 +15,11 @@ type OwnerDataContextValue = {
   updateBusiness: (id: string, updates: BusinessUpdates) => void;
   setBusinessStatus: (id: string, status: Business["status"]) => void;
   deleteBusiness: (id: string) => void;
-  inviteStaff: (input: StaffInvite) => StaffMember;
+  createStaff: (input: StaffInvite) => StaffMember;
   updateStaffRole: (id: string, role: StaffRole) => void;
-  toggleStaffStatus: (id: string) => void;
+  setStaffStatus: (id: string, status: StaffMember["status"]) => void;
+  assignStaffToOutlet: (id: string, outletId: string) => void;
+  unassignStaffFromOutlet: (id: string, outletId: string) => void;
 };
 
 const OwnerDataContext = createContext<OwnerDataContextValue | null>(null);
@@ -27,7 +29,7 @@ export function OwnerDataProvider({ children }: { children: React.ReactNode }) {
   const [staffList, setStaffList] = useState<StaffMember[]>(staffSeed);
 
   const createBusiness = useCallback((business: Business) => {
-    setBusinessList((current) => [...current, business]);
+    setBusinessList((current) => [...current, { ...business, onlineStatus: business.status === "maintenance" ? "offline" : business.onlineStatus }]);
   }, []);
 
   const updateBusiness = useCallback((id: string, updates: BusinessUpdates) => {
@@ -35,14 +37,14 @@ export function OwnerDataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setBusinessStatus = useCallback((id: string, status: Business["status"]) => {
-    setBusinessList((current) => current.map((business) => business.id === id ? { ...business, status } : business));
+    setBusinessList((current) => current.map((business) => business.id === id ? { ...business, status, onlineStatus: status === "maintenance" ? "offline" : business.onlineStatus } : business));
   }, []);
 
   const deleteBusiness = useCallback((id: string) => {
     setBusinessList((current) => current.filter((business) => business.id !== id));
   }, []);
 
-  const inviteStaff = useCallback((input: StaffInvite) => {
+  const createStaff = useCallback((input: StaffInvite) => {
     const member = makeNewStaff(input);
     setStaffList((current) => [...current, member]);
     return member;
@@ -52,8 +54,16 @@ export function OwnerDataProvider({ children }: { children: React.ReactNode }) {
     setStaffList((current) => current.map((member) => member.id === id ? { ...member, role } : member));
   }, []);
 
-  const toggleStaffStatus = useCallback((id: string) => {
-    setStaffList((current) => current.map((member) => member.id === id ? { ...member, status: member.status === "inactive" ? "active" : "inactive" } : member));
+  const setStaffStatus = useCallback((id: string, status: StaffMember["status"]) => {
+    setStaffList((current) => current.map((member) => member.id === id && member.role !== "owner" ? { ...member, status, lastActive: status === "active" ? "Aktif sekarang" : status === "inactive" ? "Dinonaktifkan oleh owner" : member.lastActive } : member));
+  }, []);
+
+  const assignStaffToOutlet = useCallback((id: string, outletId: string) => {
+    setStaffList((current) => current.map((member) => member.id === id && member.role !== "owner" && !member.outletIds.includes(outletId) ? { ...member, outletIds: [...member.outletIds, outletId] } : member));
+  }, []);
+
+  const unassignStaffFromOutlet = useCallback((id: string, outletId: string) => {
+    setStaffList((current) => current.map((member) => member.id === id && member.role !== "owner" ? { ...member, outletIds: member.outletIds.filter((assignedOutletId) => assignedOutletId !== outletId) } : member));
   }, []);
 
   const value = useMemo(() => ({
@@ -63,10 +73,12 @@ export function OwnerDataProvider({ children }: { children: React.ReactNode }) {
     updateBusiness,
     setBusinessStatus,
     deleteBusiness,
-    inviteStaff,
+    createStaff,
     updateStaffRole,
-    toggleStaffStatus,
-  }), [businessList, staffList, createBusiness, updateBusiness, setBusinessStatus, deleteBusiness, inviteStaff, updateStaffRole, toggleStaffStatus]);
+    setStaffStatus,
+    assignStaffToOutlet,
+    unassignStaffFromOutlet,
+  }), [businessList, staffList, createBusiness, updateBusiness, setBusinessStatus, deleteBusiness, createStaff, updateStaffRole, setStaffStatus, assignStaffToOutlet, unassignStaffFromOutlet]);
 
   return <OwnerDataContext.Provider value={value}>{children}</OwnerDataContext.Provider>;
 }

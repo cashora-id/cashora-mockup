@@ -27,12 +27,14 @@ import { MultiLineSvgChart } from "./_components/MultiLineSvgChart";
 import { BusinessCard } from "./_components/BusinessCard";
 import { HelpDrawer } from "./_components/HelpDrawer";
 import { DashboardTour } from "./_components/DashboardTour";
+import { StaffRegistrationModal } from "./_components/StaffRegistrationModal";
 
 import { Toast, ToastData } from "./_components/Toast";
 import { useOwnerData } from "../_components/OwnerDataProvider";
+import { StaffRegistrationInput } from "../_lib/mock-owner-data";
 
 export default function OwnerMenuPage() {
-  const { businesses: businessList, createBusiness } = useOwnerData();
+  const { businesses: businessList, createBusiness, createStaff } = useOwnerData();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("today");
   const [activeMetricTab, setActiveMetricTab] = useState<MetricTabType>("sales");
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
@@ -56,6 +58,7 @@ export default function OwnerMenuPage() {
   // Help Drawer & Interactive Tour States
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isTourActive, setIsTourActive] = useState(false);
+  const [isStaffRegistrationOpen, setIsStaffRegistrationOpen] = useState(false);
 
   // Store Management States
 
@@ -122,6 +125,7 @@ export default function OwnerMenuPage() {
       type: draft.businessType.trim(),
       location: `${draft.city.trim()} • ${draft.address.trim()}`,
       status: draft.initialStoreMode === "activate" ? "active" : "maintenance",
+      onlineStatus: draft.initialStoreMode === "activate" ? "offline" : "offline",
       category: draft.category as Business["category"],
       todaySales: "Rp 0",
       todayTransactions: 0,
@@ -131,6 +135,12 @@ export default function OwnerMenuPage() {
 
     setActiveStoreTab("all");
     setSearchQuery("");
+  };
+
+  const handleCreateStaff = (input: StaffRegistrationInput) => {
+    const member = createStaff(input);
+    setIsStaffRegistrationOpen(false);
+    showToast(`Profil ${member.name} berhasil dibuat sebagai staff Nonaktif.`, "success");
   };
 
   const filteredBusinesses = businessList.filter((b) => {
@@ -151,6 +161,7 @@ export default function OwnerMenuPage() {
         onMarkAllAsRead={handleMarkAllAsRead}
         onClearAll={handleClearAll}
         onHelpToggle={() => setIsHelpOpen((prev) => !prev)}
+        onAddStaff={() => setIsStaffRegistrationOpen(true)}
       />
 
       {/* ========== HERO BANNER & PERIOD SELECTOR (TOUR TARGET 2) ========== */}
@@ -175,32 +186,32 @@ export default function OwnerMenuPage() {
               </p>
             </div>
 
-            {/* Filter Buttons */}
-            <div className="bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 flex flex-wrap gap-1">
-              {[
-                { id: "today", label: "Hari Ini" },
-                { id: "yesterday", label: "Kemarin" },
-                { id: "7d", label: "7 Hari" },
-                { id: "30d", label: "30 Hari" },
-                { id: "q1", label: "Q1" },
-                { id: "q2", label: "Q2" },
-                { id: "q3", label: "Q3" },
-                { id: "q4", label: "Q4" },
-                { id: "h1", label: "S1" },
-                { id: "h2", label: "S2" },
-              ].map((period) => (
-                <button
-                  key={period.id}
-                  onClick={() => setSelectedPeriod(period.id as PeriodType)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                    selectedPeriod === period.id
-                      ? "bg-[#00C897] text-[#0A2540] shadow-md shadow-emerald-500/20 scale-105"
-                      : "text-slate-200 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {period.label}
-                </button>
-              ))}
+            {/* Compact period filters */}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-1 rounded-2xl border border-white/10 bg-white/10 p-1 backdrop-blur-md">
+                {[
+                  { id: "today", label: "Hari Ini" },
+                  { id: "yesterday", label: "Kemarin" },
+                  { id: "7d", label: "7 Hari" },
+                  { id: "30d", label: "30 Hari" },
+                ].map((period) => (
+                  <button key={period.id} onClick={() => setSelectedPeriod(period.id as PeriodType)} className={`rounded-xl px-3 py-2 text-xs font-bold transition-all ${selectedPeriod === period.id ? "bg-[#00C897] text-[#0A2540] shadow-md shadow-emerald-500/20" : "text-slate-200 hover:bg-white/10 hover:text-white"}`}>
+                    {period.label}
+                  </button>
+                ))}
+              </div>
+              <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-3 py-1 backdrop-blur-md">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Periode</span>
+                <select aria-label="Pilih periode bisnis" value={["q1", "q2", "q3", "q4", "h1", "h2"].includes(selectedPeriod) ? selectedPeriod : "business"} onChange={(event) => { if (event.target.value !== "business") setSelectedPeriod(event.target.value as PeriodType); }} className="bg-transparent py-2 text-xs font-bold text-white outline-none [&>option]:text-[#0A2540]">
+                  <option value="business" disabled>Quarter / Semester</option>
+                  <optgroup label="Quarter">
+                    <option value="q1">Q1</option><option value="q2">Q2</option><option value="q3">Q3</option><option value="q4">Q4</option>
+                  </optgroup>
+                  <optgroup label="Semester">
+                    <option value="h1">Semester 1</option><option value="h2">Semester 2</option>
+                  </optgroup>
+                </select>
+              </label>
             </div>
           </div>
 
@@ -595,6 +606,13 @@ export default function OwnerMenuPage() {
         existingBusinesses={businessList}
         onClose={() => setIsStoreRegistrationOpen(false)}
         onCreate={handleCreateBusiness}
+      />
+
+      <StaffRegistrationModal
+        isOpen={isStaffRegistrationOpen}
+        businesses={businessList}
+        onClose={() => setIsStaffRegistrationOpen(false)}
+        onCreate={handleCreateStaff}
       />
 
 

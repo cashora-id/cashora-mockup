@@ -20,10 +20,11 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
-import { InventoryItem, OutletSettings, categoryLabel, inventorySeed, outletSettingsSeed, StaffMember, StaffRole } from "../../_lib/mock-owner-data";
+import { InventoryItem, OutletSettings, categoryLabel, inventorySeed, outletSettingsSeed, StaffMember } from "../../_lib/mock-owner-data";
 import { useOwnerToast } from "../../_components/OwnerToastProvider";
 import { useOwnerData } from "../../_components/OwnerDataProvider";
 import { DeleteStoreModal } from "../_components/DeleteStoreModal";
+import { OutletStaffAccessPanel } from "../_components/OutletStaffAccessPanel";
 
 type DetailTab = "overview" | "inventory" | "staff" | "settings";
 
@@ -35,14 +36,13 @@ const inventoryTone: Record<InventoryItem["level"], { label: string; shell: stri
 
 export default function OutletDetailPage() {
   const params = useParams<{ id: string }>();
-  const { businesses, staff, setBusinessStatus, updateBusiness, deleteBusiness, inviteStaff, updateStaffRole, toggleStaffStatus } = useOwnerData();
+  const { businesses, staff, setBusinessStatus, updateBusiness, deleteBusiness, updateStaffRole, setStaffStatus, assignStaffToOutlet, unassignStaffFromOutlet } = useOwnerData();
   const outlet = businesses.find((business) => business.id === params.id);
   const { showToast } = useOwnerToast();
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [inventoryQuery, setInventoryQuery] = useState("");
   const [settings, setSettings] = useState<OutletSettings | null>(outlet ? outletSettingsSeed[outlet.id] : null);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [inviteOpen, setInviteOpen] = useState(false);
 
   const items = useMemo(() => inventorySeed.filter((item) => item.outletId === outlet?.id && item.name.toLowerCase().includes(inventoryQuery.toLowerCase())), [inventoryQuery, outlet?.id]);
   const criticalCount = inventorySeed.filter((item) => item.outletId === outlet?.id && item.level === "critical").length;
@@ -163,9 +163,8 @@ export default function OutletDetailPage() {
           <section className="mt-7 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#00A87E]">Akses outlet</p><h2 className="mt-1 text-xl font-extrabold text-[#0A2540]">Staff & Akses</h2><p className="mt-1 text-sm text-slate-500">Kelola anggota yang dapat mengakses {outlet.name}.</p></div>
-              <button type="button" onClick={() => setInviteOpen(true)} className="rounded-xl bg-[#0A2540] px-4 py-2.5 text-xs font-extrabold text-[#00C897]">Undang Staff</button>
             </div>
-            <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200"><table className="min-w-[720px] w-full text-left text-xs"><thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><tr><th className="px-4 py-3">Anggota</th><th className="px-4 py-3">Peran</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Aksi</th></tr></thead><tbody className="divide-y divide-slate-100">{outletStaff.map((member) => <tr key={member.id}><td className="px-4 py-4"><p className="font-extrabold text-[#0A2540]">{member.name}</p><p className="mt-0.5 text-[10px] text-slate-400">{member.phone}</p></td><td className="px-4 py-4 font-bold text-slate-700">{member.role === "owner" ? "Owner Utama" : member.role === "manager" ? "Manager Outlet" : "Kasir"}</td><td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold ${member.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>{member.status === "active" ? "Aktif" : member.status === "invited" ? "Diundang" : "Nonaktif"}</span></td><td className="px-4 py-4"><button type="button" disabled={member.role === "owner"} onClick={() => { if (member.role !== "owner") { toggleStaffStatus(member.id); showToast("success", `Status akses ${member.name} diperbarui.`); } }} className="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-extrabold text-[#0A2540] disabled:cursor-not-allowed disabled:opacity-40">{member.status === "inactive" ? "Aktifkan" : "Nonaktifkan"}</button></td></tr>)}</tbody></table></div>
+            <OutletStaffAccessPanel outletId={outlet.id} outletName={outlet.name} />
           </section>
         )}
 
@@ -176,7 +175,6 @@ export default function OutletDetailPage() {
         )}
       </main>
       {deleteOpen && <DeleteStoreModal target={outlet} onCancel={() => setDeleteOpen(false)} onConfirm={confirmDelete} />}
-      {inviteOpen && <OutletInviteModal outletId={outlet.id} onClose={() => setInviteOpen(false)} onInvite={(input) => { const member = inviteStaff(input); setInviteOpen(false); showToast("success", `Undangan untuk ${member.name} berhasil dicatat.`); }} />}
     </div>
   );
 }
@@ -185,14 +183,3 @@ function ReceiptIcon({ className }: { className?: string }) { return <Box classN
 function InventorySummary({ label, count, tone }: { label: string; count: number; tone: "rose" | "amber" | "emerald" }) { const colors = { rose: "border-rose-100 bg-rose-50 text-rose-700", amber: "border-amber-100 bg-amber-50 text-amber-700", emerald: "border-emerald-100 bg-emerald-50 text-emerald-700" }; return <div className={`rounded-2xl border p-4 ${colors[tone]}`}><p className="text-[11px] font-bold">{label}</p><p className="mt-1 text-2xl font-black">{count}</p></div>; }
 function SettingsField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="block"><span className="mb-1.5 block text-xs font-bold text-slate-600">{label}</span><input value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-[#00C897] focus:ring-2 focus:ring-[#00C897]/20" /></label>; }
 function ToggleSetting({ label, enabled, onToggle }: { label: string; enabled: boolean; onToggle: () => void }) { return <button type="button" onClick={onToggle} className="flex items-center justify-between rounded-xl bg-white p-3 text-left text-xs font-bold text-slate-700 shadow-sm"><span>{label}</span><span className={`h-5 w-9 rounded-full p-0.5 transition-colors ${enabled ? "bg-[#00C897]" : "bg-slate-200"}`}><span className={`block h-4 w-4 rounded-full bg-white shadow transition-transform ${enabled ? "translate-x-4" : "translate-x-0"}`} /></span></button>; }
-
-function OutletInviteModal({ outletId, onClose, onInvite }: { outletId: string; onClose: () => void; onInvite: (input: { name: string; phone: string; role: StaffRole; outletIds: string[] }) => void }) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<StaffRole>("cashier");
-  const submit = () => {
-    if (name.trim().length < 3 || phone.replace(/\D/g, "").length < 9) return;
-    onInvite({ name: name.trim(), phone: phone.trim(), role, outletIds: [outletId] });
-  };
-  return <div className="fixed inset-0 z-[9990] flex items-center justify-center p-4"><button onClick={onClose} aria-label="Tutup" className="absolute inset-0 bg-slate-900/55 backdrop-blur-sm" /><section role="dialog" aria-modal="true" aria-labelledby="outlet-invite-title" className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"><h2 id="outlet-invite-title" className="text-lg font-extrabold text-[#0A2540]">Undang staff outlet</h2><p className="mt-1 text-xs text-slate-500">Undangan mock akan dikaitkan dengan outlet ini.</p><div className="mt-5 space-y-4"><SettingsField label="Nama lengkap" value={name} onChange={setName} /><SettingsField label="Nomor WhatsApp" value={phone} onChange={setPhone} /><label className="block"><span className="mb-1.5 block text-xs font-bold text-slate-600">Peran</span><select value={role} onChange={(event) => setRole(event.target.value as StaffRole)} className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><option value="manager">Manager Outlet</option><option value="cashier">Kasir</option></select></label></div><div className="mt-6 flex justify-end gap-2"><button onClick={onClose} className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-extrabold text-slate-600">Batal</button><button onClick={submit} className="rounded-xl bg-[#0A2540] px-4 py-2.5 text-xs font-extrabold text-[#00C897]">Buat Undangan</button></div></section></div>;
-}

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, CircleHelp, User, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
+import { Bell, CircleHelp, User, UserRoundPlus, LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import { Notification } from "../types";
 import { ownerName } from "../data";
 import { NotificationDropdown } from "./NotificationDropdown";
@@ -15,6 +15,7 @@ interface OwnerHeaderProps {
   onMarkAllAsRead: () => void;
   onClearAll: () => void;
   onHelpToggle: () => void;
+  onAddStaff: () => void;
 }
 
 export function OwnerHeader({
@@ -23,6 +24,7 @@ export function OwnerHeader({
   onMarkAllAsRead,
   onClearAll,
   onHelpToggle,
+  onAddStaff,
 }: OwnerHeaderProps) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -160,6 +162,15 @@ export function OwnerHeader({
                     <User className="w-4 h-4 text-[#00C897]" />
                     Pengaturan Profil Saya
                   </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => { setIsProfileOpen(false); onAddStaff(); }}
+                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 transition-colors hover:bg-emerald-50 hover:text-[#0A2540]"
+                  >
+                    <UserRoundPlus className="h-4 w-4 text-[#00A87E]" />
+                    Tambah Staff Baru
+                  </button>
 
 
                   <Link

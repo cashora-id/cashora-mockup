@@ -20,6 +20,7 @@ interface BusinessCardProps {
 
 export function BusinessCard({ business }: BusinessCardProps) {
   const isActive = business.status === "active";
+  const isOnline = isActive && business.onlineStatus === "online";
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -50,10 +51,10 @@ export function BusinessCard({ business }: BusinessCardProps) {
         </div>
 
         <h3 className={`mb-1 line-clamp-1 text-lg font-bold transition-colors group-hover:text-[#00C897] ${isActive ? "text-[#0A2540]" : "text-slate-500"}`}>{business.name}</h3>
-        <p className="mb-6 flex items-center gap-1.5 text-xs font-medium text-slate-500"><span>{business.type}</span><span className="text-slate-300">•</span><span>{business.location}</span></p>
+        <div className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs font-medium text-slate-500"><p className="flex items-center gap-1.5"><span>{business.type}</span><span className="text-slate-300">•</span><span>{business.location}</span></p><span role="status" aria-label={`Status koneksi ${isOnline ? "Online" : "Offline"}`} title={isOnline ? "Toko sedang terhubung dan siap menerima aktivitas POS" : "Toko sedang tidak terhubung"} className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] font-extrabold ${isOnline ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-100 text-slate-500"}`}><span aria-hidden className={`h-1.5 w-1.5 rounded-full ${isOnline ? "bg-emerald-500" : "bg-slate-400"}`} />{isOnline ? "Online" : "Offline"}</span></div>
 
         {isActive ? (
-          <div className="mt-4 mb-5 grid grid-cols-2 gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+          <div className="mt-2 mb-5 grid grid-cols-2 gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3.5">
             <div><p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Penjualan Hari Ini</p><p className="text-sm font-extrabold text-[#0A2540]">{business.todaySales}</p></div>
             <div><p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Transaksi</p><div className="flex items-center justify-between"><p className="text-sm font-extrabold text-[#0A2540]">{business.todayTransactions}x</p><span className="flex items-center gap-0.5 text-[10px] font-bold text-emerald-600"><TrendingUp className="h-3 w-3" />{business.growth}</span></div><p className="mt-1 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Pertumbuhan</p></div>
           </div>
